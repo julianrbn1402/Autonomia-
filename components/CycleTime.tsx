@@ -218,10 +218,10 @@ const getProductivityConversion = (distance: number): number | null => {
 
 const calculatePlanCycleTime = (distance: number): number => {
     if (distance <= 0) return 0;
-    const speed = getPlanSpeed(distance);
-    if (speed === 0) return 0;
-    // New formula: (120 * Jarak / Plan Speed) + 3.73 + 1.3 + 1
-    return (120 * distance / speed) + 3.73 + 1.3 + 1;
+    const conversion = getProductivityConversion(distance);
+    if (conversion === null || conversion <= 0) return 0;
+    // New formula: 60 / ((Konversi Productivity HD by Jarak * 231) / 41)
+    return 60 / ((conversion * 231) / 41);
 };
 
 const SpeedTable: React.FC = () => (
@@ -326,7 +326,7 @@ const CycleTime: React.FC = () => {
 
     useEffect(() => {
         if (planCycleTime !== null) {
-            const recommendedTime = planCycleTime - 3.73;
+            const recommendedTime = planCycleTime - 4.73;
             setRekomendasiWaktuTravel(recommendedTime > 0 ? recommendedTime : null);
         } else {
             setRekomendasiWaktuTravel(null);
@@ -411,10 +411,10 @@ const CycleTime: React.FC = () => {
             setCycleTimeStatus('neutral');
         }
     
-        // Serving Time Status (Actual <= 3.73)
+        // Serving Time Status (Actual <= 4.73)
         const servTime = parseFloat(servingTime);
         if (!isNaN(servTime)) {
-            setServingTimeStatus(servTime <= 3.73 ? 'good' : 'bad');
+            setServingTimeStatus(servTime <= 4.73 ? 'good' : 'bad');
         } else {
             setServingTimeStatus('neutral');
         }
@@ -487,8 +487,8 @@ const CycleTime: React.FC = () => {
         }
 
         if (!isNaN(servTime) && servTime > 0) {
-            if (servTime > 3.73) {
-                newSuggestions.push(`Serving Time Aktual (${servTime.toFixed(1)} menit) lebih tinggi dari target (3.73 menit). Evaluasi proses pemuatan untuk efisiensi.`);
+            if (servTime > 4.73) {
+                newSuggestions.push(`Serving Time Aktual (${servTime.toFixed(1)} menit) lebih tinggi dari target (4.73 menit). Evaluasi proses pemuatan untuk efisiensi.`);
             }
         }
 
@@ -561,7 +561,7 @@ const CycleTime: React.FC = () => {
                     <Card title="Jumlah HD" value={jumlahHD ? `${jumlahHD} Unit` : '-'} icon={<MiningTruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />} />
                     <Card title="Plan Cycle Time by Jarak" value={planCycleTime ? `${planCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} />
                     <Card title="Cycle Time HD Aktual" value={totalAktualCycleTime ? `${totalAktualCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} status={cycleTimeStatus} />
-                    <Card title="Serving Time Plan" value="3,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
+                    <Card title="Serving Time Plan" value="4,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
                     <Card title="Serving Time Aktual" value={servingTime ? `${servingTime} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} status={servingTimeStatus} />
                     <Card title="Toleransi Hanging/Waiting HD" value="0,35 Menit/Rit" icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} />
                     <Card title="Potensial Hanging/Waiting HD Aktual" value={potensialHangingActual !== null ? `${potensialHangingActual.toFixed(1)} Menit/Rit` : '-'} icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} status={hangingStatus} />
