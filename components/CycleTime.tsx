@@ -224,6 +224,27 @@ const calculatePlanCycleTime = (distance: number): number => {
     return 60 / ((conversion * 231) / 41);
 };
 
+const PlanCycleTimeTable: React.FC = () => (
+    <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg" role="table" aria-label="Tabel Plan Cycle Time by Jarak">
+        <table className="w-full text-sm text-left text-slate-400">
+            <thead className="text-xs text-slate-300 uppercase bg-slate-700 sticky top-0">
+                <tr>
+                    <th scope="col" className="px-6 py-3">Jarak (km)</th>
+                    <th scope="col" className="px-6 py-3">Plan Cycle Time (Menit)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {productivityConversionData.map((row) => (
+                    <tr key={row.distance} className="bg-slate-800 border-b border-slate-700 hover:bg-slate-700/50">
+                        <td className="px-6 py-3 font-medium text-slate-200 whitespace-nowrap">{row.distance.toFixed(1)}</td>
+                        <td className="px-6 py-3">{calculatePlanCycleTime(row.distance).toFixed(2)}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+);
+
 const SpeedTable: React.FC = () => (
     <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg" role="table" aria-label="Tabel Plan Speed berdasarkan Jarak">
         <table className="w-full text-sm text-left text-slate-400">
@@ -326,7 +347,8 @@ const CycleTime: React.FC = () => {
 
     useEffect(() => {
         if (planCycleTime !== null) {
-            const recommendedTime = planCycleTime - 4.73;
+            // Updated plan serving time to 3.73
+            const recommendedTime = planCycleTime - 3.73;
             setRekomendasiWaktuTravel(recommendedTime > 0 ? recommendedTime : null);
         } else {
             setRekomendasiWaktuTravel(null);
@@ -411,10 +433,10 @@ const CycleTime: React.FC = () => {
             setCycleTimeStatus('neutral');
         }
     
-        // Serving Time Status (Actual <= 4.73)
+        // Serving Time Status (Actual <= 3.73)
         const servTime = parseFloat(servingTime);
         if (!isNaN(servTime)) {
-            setServingTimeStatus(servTime <= 4.73 ? 'good' : 'bad');
+            setServingTimeStatus(servTime <= 3.73 ? 'good' : 'bad');
         } else {
             setServingTimeStatus('neutral');
         }
@@ -487,8 +509,8 @@ const CycleTime: React.FC = () => {
         }
 
         if (!isNaN(servTime) && servTime > 0) {
-            if (servTime > 4.73) {
-                newSuggestions.push(`Serving Time Aktual (${servTime.toFixed(1)} menit) lebih tinggi dari target (4.73 menit). Evaluasi proses pemuatan untuk efisiensi.`);
+            if (servTime > 3.73) {
+                newSuggestions.push(`Serving Time Aktual (${servTime.toFixed(1)} menit) lebih tinggi dari target (3.73 menit). Evaluasi proses pemuatan untuk efisiensi.`);
             }
         }
 
@@ -561,7 +583,7 @@ const CycleTime: React.FC = () => {
                     <Card title="Jumlah HD" value={jumlahHD ? `${jumlahHD} Unit` : '-'} icon={<MiningTruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />} />
                     <Card title="Plan Cycle Time by Jarak" value={planCycleTime ? `${planCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} />
                     <Card title="Cycle Time HD Aktual" value={totalAktualCycleTime ? `${totalAktualCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} status={cycleTimeStatus} />
-                    <Card title="Serving Time Plan" value="4,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
+                    <Card title="Serving Time Plan" value="3,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
                     <Card title="Serving Time Aktual" value={servingTime ? `${servingTime} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} status={servingTimeStatus} />
                     <Card title="Toleransi Hanging/Waiting HD" value="0,35 Menit/Rit" icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} />
                     <Card title="Potensial Hanging/Waiting HD Aktual" value={potensialHangingActual !== null ? `${potensialHangingActual.toFixed(1)} Menit/Rit` : '-'} icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} status={hangingStatus} />
@@ -578,6 +600,10 @@ const CycleTime: React.FC = () => {
                  <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700/50">
                     <h2 className="text-xl font-semibold text-slate-200 mb-6">Detail Konten</h2>
                     <div className="space-y-8">
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-200 mb-4">Tabel Plan Cycle Time by Jarak</h3>
+                            <PlanCycleTimeTable />
+                        </div>
                         <div>
                             <h3 className="text-lg font-semibold text-slate-200 mb-4">Tabel Plan Speed by Jarak</h3>
                             <SpeedTable />
