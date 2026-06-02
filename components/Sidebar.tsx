@@ -1,4 +1,5 @@
 import React from 'react';
+import { RouteIcon, ChartBarIcon, BookOpenIcon } from './icons';
 
 const AnimatedBrainIcon: React.FC = () => (
   <svg
@@ -41,11 +42,16 @@ const AnimatedBrainIcon: React.FC = () => (
 );
 
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  activeTab: 'observasi' | 'prestasi' | 'referensi';
+  setActiveTab: (tab: 'observasi' | 'prestasi' | 'referensi') => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <header className="bg-slate-800/50 border-b border-slate-700/50 sticky top-0 z-10 backdrop-blur-sm">
+    <header className="bg-slate-800/50 border-b border-slate-700/50 sticky top-0 z-20 backdrop-blur-sm">
       <div className="mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-0 md:h-20 gap-4 md:gap-0">
           <div className="flex items-center">
             <AnimatedBrainIcon />
             <div className="ml-3">
@@ -53,6 +59,44 @@ const Header: React.FC = () => {
                   AUTONOMIA!
                 </h1>
                 <p className="text-xs italic text-slate-400 -mt-1">Autonomous Learning for Operational Excellence</p>
+            </div>
+          </div>
+
+          <div className="flex items-center w-full md:w-auto justify-center md:justify-end">
+            <div className="inline-flex p-1 bg-slate-950/60 border border-slate-700/30 rounded-xl shadow-inner gap-1 w-full sm:w-auto">
+              <button
+                onClick={() => setActiveTab('observasi')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 sm:px-5 sm:py-2 font-bold text-xs sm:text-sm rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'observasi'
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <RouteIcon className="h-4 w-4 shrink-0" />
+                <span>Observasi</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('prestasi')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 sm:px-5 sm:py-2 font-bold text-xs sm:text-sm rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'prestasi'
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <ChartBarIcon className="h-4 w-4 shrink-0" />
+                <span>Prestasi</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('referensi')}
+                className={`flex-1 sm:flex-initial px-3 py-1.5 sm:px-5 sm:py-2 font-bold text-xs sm:text-sm rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'referensi'
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <BookOpenIcon className="h-4 w-4 shrink-0" />
+                <span>Referensi</span>
+              </button>
             </div>
           </div>
         </div>

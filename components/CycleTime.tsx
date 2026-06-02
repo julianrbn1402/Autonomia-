@@ -288,8 +288,12 @@ const ProductivityTable: React.FC = () => (
 );
 
 
-const CycleTime: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'observasi' | 'prestasi' | 'referensi'>('observasi');
+interface CycleTimeProps {
+    activeTab: 'observasi' | 'prestasi' | 'referensi';
+    setActiveTab: (tab: 'observasi' | 'prestasi' | 'referensi') => void;
+}
+
+const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
     const [jarak, setJarak] = useState('');
     const [jumlahHD, setJumlahHD] = useState('');
     const [servingTime, setServingTime] = useState('');
@@ -608,43 +612,6 @@ const CycleTime: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            {/* Tabs Navigation */}
-            <div className="flex border-b border-slate-700/60 pb-px">
-                <button
-                    onClick={() => setActiveTab('observasi')}
-                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
-                        activeTab === 'observasi'
-                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
-                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
-                    }`}
-                >
-                    <RouteIcon className="h-4 w-4" />
-                    <span>Observasi</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('prestasi')}
-                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
-                        activeTab === 'prestasi'
-                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
-                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
-                    }`}
-                >
-                    <ChartBarIcon className="h-4 w-4" />
-                    <span>Prestasi</span>
-                </button>
-                <button
-                    onClick={() => setActiveTab('referensi')}
-                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
-                        activeTab === 'referensi'
-                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
-                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
-                    }`}
-                >
-                    <BookOpenIcon className="h-4 w-4" />
-                    <span>Referensi</span>
-                </button>
-            </div>
-
             {activeTab === 'observasi' && (
                 <div className="animate-fade-in space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
