@@ -115,3 +115,10 @@ export const RotateCcwIcon: React.FC<IconProps> = ({ className }) => (
         <polyline points="3 3 3 8 8 8"></polyline>
     </svg>
 );
+
+export const WhatsappIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08c0 4.88-3.95 8.85-8.83 8.85-.35 0-.7-.02-1.04-.07L7 21l1.35-4.4a8.8 8.8 0 0 1-1.07-4.22c0-4.88 3.95-8.85 8.83-8.85 2.39 0 4.63.93 6.32 2.62a8.8 8.8 0 0 1 2.57 6.23z"/>
+        <path d="M12.3 8.3a.5.5 0 0 0-.7 0L10.3 9.6c-.3.3-.3.9 0 1.2.7.7 1.5 1.5 2.2 2.2.3.3.9.3 1.2 0l1.3-1.3a.5.5 0 0 0 0-.7l-1.3-1.3a.5.5 0 0 0-.7 0l-.4.4-.3-.4-1-.1c-.4-.1-.7.2-.7.6s.3.7.7.7h1" strokeDasharray="1 1" />
+    </svg>
+);

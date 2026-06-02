@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, TimerIcon, TrashIcon, PlusIcon, PlayIcon, StopIcon, RotateCcwIcon } from './icons';
+import { StopwatchCSLoader } from './StopwatchCSLoader';
+import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, TimerIcon, TrashIcon, PlusIcon, PlayIcon, StopIcon, RotateCcwIcon, WhatsappIcon } from './icons';
 
 type Status = 'good' | 'bad' | 'neutral';
 
@@ -289,8 +290,8 @@ const ProductivityTable: React.FC = () => (
 
 
 interface CycleTimeProps {
-    activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi';
-    setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi') => void;
+    activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about';
+    setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about') => void;
 }
 
 const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
@@ -1442,10 +1443,9 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                                             : 0;
                                                         const totalTimeMinutes = totalTimeMs / (1000 * 60);
 
-                                                        const mfPart = ((count - 1) * servTime) / cycTime;
-                                                        const fraction = mfAktual - mfPart;
-                                                        delayCS = totalTimeMinutes * fraction;
-                                                        totalPCIdle = loaderIdle + delayCS;
+                                                        const fraction = 1 - (((count - 1) * servTime) / cycTime);
+                                                        delayCS = fraction * totalTimeMinutes;
+                                                        totalPCIdle = (60 - totalTimeMinutes) - ((mfAktual * (60 - totalTimeMinutes)) + delayCS);
                                                     }
 
                                                     return (
@@ -1459,7 +1459,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                                             <td className="py-2 px-1 text-center font-mono text-indigo-400">
                                                                 {delayCS.toFixed(2)}
                                                                 <span className="text-[9px] text-slate-500 block">
-                                                                    ({((totalTimeMs || 0)/(60000)).toFixed(1)}m × {(mfAktual - (((count-1)*servTime)/cycTime)).toFixed(2)})
+                                                                    ({((totalTimeMs || 0)/(60000)).toFixed(1)}m × {(1 - (((count - 1) * servTime) / cycTime)).toFixed(2)})
                                                                 </span>
                                                             </td>
                                                             <td className="py-2.5 px-1 text-right font-mono font-bold text-amber-400 bg-amber-500/5 rounded">
@@ -1498,6 +1498,51 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                 <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Konversi Produktivitas by Jarak</h3>
                                 <ProductivityTable />
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'stopwatch_cs' && (
+                <StopwatchCSLoader />
+            )}
+
+            {activeTab === 'about' && (
+                <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto space-y-6 text-left shadow-xl backdrop-blur-md animate-fade-in font-sans">
+                    <div className="flex items-center gap-3 pb-4 border-b border-slate-700/50">
+                        <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-500">
+                            <LightbulbIcon className="h-6 w-6 shrink-0" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">About this Tools</h2>
+                            <p className="text-xs text-slate-400 mt-0.5">Autonomous Learning for Operational Excellence</p>
+                        </div>
+                    </div>
+                    <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
+                        <p>
+                            Efisiensi operasional alat berat merupakan faktor kritis dalam pencapaian target produksi tambang. Setiap waktu tidak produktif pada loader maupun hauler berdampak langsung pada ritase dan nilai produksi secara keseluruhan. Namun dalam praktik di lapangan, pengukuran dan analisis produktivitas fleet masih sering dilakukan secara manual, membutuhkan waktu lama, dan rentan terhadap kesalahan perhitungan yang dapat memperlambat pengambilan keputusan.
+                        </p>
+                        <p>
+                            Tools ini hadir untuk menjawab tantangan tersebut dengan memanfaatkan teknologi kecerdasan buatan yang mampu memproses data lapangan secara cepat dan akurat. Mulai dari perhitungan Match Factor per fleet, analisis delay loader akibat changeshift, hingga evaluasi utilisasi alat dalam satu periode observasi — semua dapat diselesaikan dalam hitungan detik. Dengan demikian, pengawas lapangan dan manajemen operasional dapat mengambil keputusan berbasis data secara real-time demi peningkatan produktivitas yang konsisten dan berkelanjutan.
+                        </p>
+                    </div>
+                    <div className="pt-6 border-t border-slate-700/30 flex flex-col items-center justify-center gap-6">
+                        <div className="flex flex-col items-center text-center gap-3 max-w-md w-full mx-auto">
+                            <span className="text-xs sm:text-sm text-slate-400 font-medium">Jika ada pertanyaan, atau request fitur silahkan hubungi:</span>
+                            <a 
+                                href="https://wa.me/6282123781040" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30 rounded-xl transition-all duration-300 font-bold cursor-pointer text-sm shadow-md hover:scale-102 active:scale-98"
+                                title="Hubungi via WhatsApp"
+                            >
+                                <WhatsappIcon className="h-5 w-5 text-emerald-400 animate-pulse" />
+                                <span>Hubungi via WhatsApp</span>
+                            </a>
+                        </div>
+                        <div className="flex flex-col items-center w-full pt-4 border-t border-slate-700/10">
+                            <span className="text-xs text-slate-500">Salam hangat,</span>
+                            <span className="text-sm font-bold text-amber-400 mt-0.5 font-sans">Developer</span>
                         </div>
                     </div>
                 </div>

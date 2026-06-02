@@ -3,8 +3,8 @@ import React from 'react';
 import CycleTime from './CycleTime';
 
 interface MainContentProps {
-  activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi';
-  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi') => void;
+  activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about';
+  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about') => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ activeTab, setActiveTab }) => {
