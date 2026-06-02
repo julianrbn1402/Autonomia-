@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon } from './icons';
+import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, TimerIcon, TrashIcon, PlusIcon, PlayIcon, StopIcon, RotateCcwIcon } from './icons';
 
 type Status = 'good' | 'bad' | 'neutral';
 
@@ -289,11 +289,238 @@ const ProductivityTable: React.FC = () => (
 
 
 interface CycleTimeProps {
-    activeTab: 'observasi' | 'prestasi' | 'referensi';
-    setActiveTab: (tab: 'observasi' | 'prestasi' | 'referensi') => void;
+    activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi';
+    setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi') => void;
 }
 
 const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
+    interface HDUnit {
+        id: string;
+        unitName: string;
+        time: number; // in ms
+        isRunning: boolean;
+        startTime: number | null;
+    }
+
+    const [loaders, setLoaders] = useState<Array<{
+        id: string;
+        name: string;
+        jumlahHD: string;
+        servingTime: string;
+        cycleTimeHD: string;
+        showDetails: boolean;
+        showStopwatches?: boolean;
+        hdUnits?: HDUnit[];
+    }>>([]);
+
+    const handleAddLoader = () => {
+        const nextIdNum = Math.max(...loaders.map(l => parseInt(l.id) || 0), 0) + 1;
+        const nextId = nextIdNum.toString();
+        const nextNumber = 1216 + nextIdNum;
+        const defaultName = `EX${nextNumber}`;
+        setLoaders([
+            ...loaders,
+            { id: nextId, name: defaultName, jumlahHD: '', servingTime: '', cycleTimeHD: '', showDetails: false, showStopwatches: true, hdUnits: [] }
+        ]);
+    };
+
+    const handleRemoveLoader = (id: string) => {
+        setLoaders(loaders.filter(l => l.id !== id));
+    };
+
+    const handleToggleDetails = (id: string) => {
+        setLoaders(loaders.map(loader => {
+            if (loader.id === id) {
+                return { ...loader, showDetails: !loader.showDetails };
+            }
+            return loader;
+        }));
+    };
+
+    const handleToggleStopwatches = (id: string) => {
+        setLoaders(loaders.map(loader => {
+            if (loader.id === id) {
+                return { ...loader, showStopwatches: loader.showStopwatches === false ? true : false };
+            }
+            return loader;
+        }));
+    };
+
+    const handleUpdateLoader = (id: string, field: 'name' | 'jumlahHD' | 'servingTime' | 'cycleTimeHD', value: string) => {
+        setLoaders(loaders.map(loader => {
+            if (loader.id === id) {
+                const updatedLoader = { ...loader, [field]: value };
+                
+                if (field === 'jumlahHD') {
+                    const count = parseInt(value) || 0;
+                    let units: HDUnit[] = loader.hdUnits ? [...loader.hdUnits] : [];
+                    
+                    if (units.length < count) {
+                        for (let i = units.length; i < count; i++) {
+                            const startingNumber = 1230 + i + 1;
+                            units.push({
+                                id: i.toString(),
+                                unitName: `HD${startingNumber}`,
+                                time: 0,
+                                isRunning: false,
+                                startTime: null
+                            });
+                        }
+                    } else if (units.length > count) {
+                        units = units.slice(0, count);
+                    }
+                    updatedLoader.hdUnits = units;
+                }
+                
+                return updatedLoader;
+            }
+            return loader;
+        }));
+    };
+
+    const handleUpdateLoaderDecimal = (id: string, field: 'servingTime' | 'cycleTimeHD', value: string) => {
+        const sanitized = value
+            .replace(',', '.')
+            .replace(/[^0-9.]/g, '')
+            .replace(/(\..*)\./g, '$1');
+        handleUpdateLoader(id, field, sanitized);
+    };
+
+    const handleUpdateLoaderInteger = (id: string, field: 'jumlahHD', value: string) => {
+        const sanitized = value.replace(/[^0-9]/g, '');
+        handleUpdateLoader(id, field, sanitized);
+    };
+
+    const handleUpdateHDName = (loaderId: string, hdId: string, name: string) => {
+        setLoaders(prev => prev.map(loader => {
+            if (loader.id === loaderId && loader.hdUnits) {
+                return {
+                    ...loader,
+                    hdUnits: loader.hdUnits.map(hd => {
+                        if (hd.id === hdId) {
+                            return { ...hd, unitName: name };
+                        }
+                        return hd;
+                    })
+                };
+            }
+            return loader;
+        }));
+    };
+
+    const handleStartStopwatch = (loaderId: string, hdId: string) => {
+        setLoaders(prev => prev.map(loader => {
+            if (loader.id === loaderId && loader.hdUnits) {
+                return {
+                    ...loader,
+                    hdUnits: loader.hdUnits.map(hd => {
+                        if (hd.id === hdId) {
+                            return {
+                                ...hd,
+                                isRunning: true,
+                                startTime: Date.now()
+                            };
+                        }
+                        return hd;
+                    })
+                };
+            }
+            return loader;
+        }));
+    };
+
+    const handleStopStopwatch = (loaderId: string, hdId: string) => {
+        setLoaders(prev => prev.map(loader => {
+            if (loader.id === loaderId && loader.hdUnits) {
+                return {
+                    ...loader,
+                    hdUnits: loader.hdUnits.map(hd => {
+                        if (hd.id === hdId) {
+                            const now = Date.now();
+                            const elapsed = hd.startTime ? (now - hd.startTime) : 0;
+                            return {
+                                ...hd,
+                                isRunning: false,
+                                time: hd.time + elapsed,
+                                startTime: null
+                            };
+                        }
+                        return hd;
+                    })
+                };
+            }
+            return loader;
+        }));
+    };
+
+    const handleResetStopwatch = (loaderId: string, hdId: string) => {
+        setLoaders(prev => prev.map(loader => {
+            if (loader.id === loaderId && loader.hdUnits) {
+                return {
+                    ...loader,
+                    hdUnits: loader.hdUnits.map(hd => {
+                        if (hd.id === hdId) {
+                            return {
+                                ...hd,
+                                isRunning: false,
+                                startTime: null,
+                                time: 0
+                            };
+                        }
+                        return hd;
+                    })
+                };
+            }
+            return loader;
+        }));
+    };
+
+    const formatStopwatch = (ms: number) => {
+        const totalSec = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSec / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
+        const tenths = Math.floor((ms % 1000) / 100);
+        
+        const pad = (num: number) => num.toString().padStart(2, '0');
+        
+        if (hours > 0) {
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${tenths}`;
+        }
+        return `${pad(minutes)}:${pad(seconds)}.${tenths}`;
+    };
+
+    // Ticking stopwatches
+    useEffect(() => {
+        let intervalId: any = null;
+        const hasRunning = loaders.some(l => l.hdUnits && l.hdUnits.some(hd => hd.isRunning));
+        
+        if (hasRunning) {
+            intervalId = setInterval(() => {
+                setLoaders(prev => prev.map(loader => {
+                    if (!loader.hdUnits) return loader;
+                    const updated = loader.hdUnits.map(hd => {
+                        if (hd.isRunning && hd.startTime !== null) {
+                            const now = Date.now();
+                            const diff = now - hd.startTime;
+                            return {
+                                ...hd,
+                                time: hd.time + diff,
+                                startTime: now
+                            };
+                        }
+                        return hd;
+                    });
+                    return { ...loader, hdUnits: updated };
+                }));
+            }, 100);
+        }
+        
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [loaders]);
+
     const [jarak, setJarak] = useState('');
     const [jumlahHD, setJumlahHD] = useState('');
     const [servingTime, setServingTime] = useState('');
@@ -307,6 +534,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [predictiveProductivityLoader, setPredictiveProductivityLoader] = useState<number | null>(null);
     const [predictiveProductivityHauler, setPredictiveProductivityHauler] = useState<number | null>(null);
+    const [showInputData, setShowInputData] = useState(true);
     
     // Status states
     const [cycleTimeStatus, setCycleTimeStatus] = useState<Status>('neutral');
@@ -617,21 +845,79 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                         {/* Left Column: Input Data */}
                         <div className="space-y-6">
-                            <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700/50">
-                                <h2 className="text-lg font-semibold mb-4 text-slate-200">Input Data Aktual</h2>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                    <InputField id="jarak" label="Jarak" value={jarak} onChange={handleDecimalChange(setJarak)} unit="km" />
-                                    <InputField id="jumlahHD" label="Jumlah HD" value={jumlahHD} onChange={handleIntegerChange(setJumlahHD)} unit="unit" />
-                                    <InputField id="servingTime" label="Serving Time" value={servingTime} onChange={handleDecimalChange(setServingTime)} unit="menit" />
-                                    <InputField id="aktualCycleTime" label="Travel Time + Dumping" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
+                            <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700/50 transition-all duration-300">
+                                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-700/40">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 rounded bg-amber-500/10 text-amber-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                                            </svg>
+                                        </div>
+                                        <h2 className="text-base sm:text-lg font-bold text-slate-200">Input Data Aktual</h2>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowInputData(!showInputData)}
+                                        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded bg-slate-700 hover:bg-slate-600 text-slate-300 transition cursor-pointer select-none"
+                                        title={showInputData ? "Sembunyikan Form" : "Tampilkan Form"}
+                                    >
+                                        {showInputData ? (
+                                            <>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z" />
+                                                    <circle cx="12" cy="12" r="3" />
+                                                </svg>
+                                                <span>Hide</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-amber-500 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20"/>
+                                                </svg>
+                                                <span>Show</span>
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setActiveTab('prestasi')}
-                                    className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
-                                >
-                                    <ChartBarIcon className="h-4 w-4" />
-                                    <span>Lihat Prestasi</span>
-                                </button>
+
+                                {showInputData ? (
+                                    <div className="animate-fade-in space-y-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                            <InputField id="jarak" label="Jarak" value={jarak} onChange={handleDecimalChange(setJarak)} unit="km" />
+                                            <InputField id="jumlahHD" label="Jumlah HD" value={jumlahHD} onChange={handleIntegerChange(setJumlahHD)} unit="unit" />
+                                            <InputField id="servingTime" label="Serving Time" value={servingTime} onChange={handleDecimalChange(setServingTime)} unit="menit" />
+                                            <InputField id="aktualCycleTime" label="Travel Time + Dumping" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
+                                        </div>
+                                        <button
+                                            onClick={() => setActiveTab('prestasi')}
+                                            className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
+                                        >
+                                            <ChartBarIcon className="h-4 w-4" />
+                                            <span>Lihat Prestasi</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="p-3.5 bg-slate-900/60 rounded-lg text-slate-400 text-xs border border-slate-700/30 font-sans space-y-3">
+                                        <div className="flex items-center gap-2 text-slate-300 font-medium pb-2 border-b border-slate-800">
+                                            <span className="relative flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                            </span>
+                                            <span>Parameter Aktif (Tersembunyi)</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px] bg-slate-950/40 p-2.5 rounded border border-slate-900">
+                                            <div>Jarak: <span className="font-mono text-amber-400 font-bold">{jarak ? `${jarak} km` : '-'}</span></div>
+                                            <div>Jumlah HD: <span className="font-mono text-amber-400 font-bold">{jumlahHD ? `${jumlahHD} unit` : '-'}</span></div>
+                                            <div>Serving Time: <span className="font-mono text-amber-400 font-bold">{servingTime ? `${servingTime} m` : '-'}</span></div>
+                                            <div>Travel + Dump: <span className="font-mono text-amber-400 font-bold">{aktualCycleTime ? `${aktualCycleTime} m` : '-'}</span></div>
+                                        </div>
+                                        <button 
+                                            onClick={() => setShowInputData(true)}
+                                            className="w-full py-1.5 px-3 bg-slate-800 hover:bg-slate-750 text-amber-500 hover:text-amber-400 rounded text-[11px] font-bold text-center transition cursor-pointer border border-slate-700/40"
+                                        >
+                                            Expand Form Input
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -789,6 +1075,403 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                          })}
                                      </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {activeTab === 'delay' && (
+                <div className="animate-fade-in space-y-6">
+                    {/* Header with actions */}
+                    <div className="flex justify-between items-center bg-slate-900/40 p-3 rounded-lg border border-slate-800/80">
+                        <div className="flex items-center gap-2">
+                            <span className="h-2.5 w-2.5 rounded-full bg-amber-550 bg-amber-500 animate-pulse"></span>
+                            <span className="text-xs font-semibold text-slate-300 font-sans">Delay &amp; Cek Bugar Dashboard</span>
+                        </div>
+                        <button
+                            onClick={handleAddLoader}
+                            className="py-1.5 px-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-md text-xs transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
+                        >
+                            <PlusIcon className="h-3.5 w-3.5 shrink-0" />
+                            <span>Tambah Unit Loader</span>
+                        </button>
+                    </div>
+
+                    {loaders.length === 0 ? (
+                        <div className="bg-slate-800/30 border border-slate-700/50 p-12 rounded-lg text-center max-w-lg mx-auto space-y-4">
+                            <TimerIcon className="h-12 w-12 text-slate-500 mx-auto animate-pulse" />
+                            <h3 className="text-base font-semibold text-slate-300">Belum ada Unit Loader</h3>
+                            <p className="text-slate-400 text-xs leading-relaxed">
+                                Klik tombol di bawah ini untuk menambahkan unit loader baru dan memonitor nilai Delay/Idle-nya.
+                            </p>
+                            <button
+                                onClick={handleAddLoader}
+                                className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs transition-all hover:bg-amber-600 cursor-pointer"
+                            >
+                                Tambah Loader Pertama
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                            {/* Left Column: Loader configuration + Cek Bugar stopwatches */}
+                            <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+                                {loaders.map((loader) => {
+                                    const hdCount = parseFloat(loader.jumlahHD) || 0;
+                                    const servTime = parseFloat(loader.servingTime) || 0;
+                                    const cycTime = parseFloat(loader.cycleTimeHD) || 0;
+
+                                    // Formulas:
+                                    // MF Aktual = (Jumlah HD * Serving Time) / Cycle Time HD
+                                    const mfAktual = cycTime > 0 ? (hdCount * servTime) / cycTime : 0;
+                                    // Lama loader idle = 60 - (MF Aktual * 60)
+                                    const loaderIdle = mfAktual >= 1 ? 0 : 60 - (mfAktual * 60);
+
+                                    // Visual Indicator states:
+                                    let percentageColor = 'bg-slate-700';
+
+                                    if (hdCount > 0 && servTime > 0 && cycTime > 0) {
+                                        if (mfAktual < 0.9) {
+                                            percentageColor = 'bg-amber-500';
+                                        } else if (mfAktual >= 0.9 && mfAktual <= 1.1) {
+                                            percentageColor = 'bg-emerald-500';
+                                        } else {
+                                            percentageColor = 'bg-rose-500';
+                                        }
+                                    }
+
+                                    // Visual progress percentage of idle time in an hour
+                                    const idlePercentage = Math.max(0, Math.min(100, (loaderIdle / 60) * 100));
+                                    const hdUnits = loader.hdUnits || [];
+
+                                    return (
+                                        <div 
+                                            key={loader.id} 
+                                            className="bg-slate-800/40 p-4 rounded-xl border border-slate-700/50 hover:border-slate-600/50 transition-all duration-200 shadow-lg space-y-4 text-left"
+                                        >
+                                            {/* Loader Header */}
+                                            <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-slate-700/40">
+                                                <div className="flex items-center gap-2 max-w-[50%]">
+                                                    <input
+                                                        type="text"
+                                                        value={loader.name}
+                                                        onChange={(e) => handleUpdateLoader(loader.id, 'name', e.target.value)}
+                                                        className="bg-transparent font-bold text-sm sm:text-base text-slate-105 text-slate-100 hover:bg-slate-700/40 focus:bg-slate-700/60 focus:outline-none focus:ring-1 focus:ring-amber-500/40 rounded px-1.5 py-0.5 w-full transition-all font-mono uppercase tracking-wide"
+                                                        placeholder="EX1217"
+                                                    />
+                                                </div>
+
+                                                {/* Compact Badges shown only when details are collapsed */}
+                                                <div className="flex items-center gap-1.5">
+                                                    {!loader.showDetails && hdCount > 0 && servTime > 0 && cycTime > 0 && (
+                                                        <div className="hidden sm:flex items-center gap-1.5">
+                                                            <span className="text-[10px] bg-slate-900/60 text-slate-300 border border-slate-805/45 px-1.5 py-0.5 rounded font-sans">
+                                                                {hdUnits.length} HD
+                                                            </span>
+                                                            <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1.5 py-0.5 rounded font-mono font-medium">
+                                                                MF: {mfAktual.toFixed(2)}
+                                                            </span>
+                                                            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-mono font-medium">
+                                                                Idle: {loaderIdle.toFixed(1)}m
+                                                            </span>
+                                                        </div>
+                                                    )}
+
+                                                    <button
+                                                        onClick={() => handleToggleDetails(loader.id)}
+                                                        className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all cursor-pointer select-none ${
+                                                            loader.showDetails
+                                                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                                                : 'bg-slate-800 text-slate-305 hover:bg-slate-700 border border-slate-700/50'
+                                                        }`}
+                                                    >
+                                                        {loader.showDetails ? 'Tutup Parameter' : 'Ubah Parameter'}
+                                                    </button>
+                                                    
+                                                    <button
+                                                        onClick={() => handleRemoveLoader(loader.id)}
+                                                        className="p-1 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-all cursor-pointer"
+                                                        title="Hapus Loader"
+                                                    >
+                                                        <TrashIcon className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Details & Calculations (Collapsible) */}
+                                            {loader.showDetails && (
+                                                <div className="space-y-4 animate-fade-in text-left bg-slate-900/30 p-3.5 rounded-lg border border-slate-800/80">
+                                                    {/* Compact inputs */}
+                                                    <div className="grid grid-cols-3 gap-3">
+                                                        {/* Jumlah HD */}
+                                                        <div>
+                                                            <label className="block text-[10px] font-medium text-slate-400 mb-1 font-sans">Jumlah HD</label>
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="numeric"
+                                                                    value={loader.jumlahHD}
+                                                                    onChange={(e) => handleUpdateLoaderInteger(loader.id, 'jumlahHD', e.target.value)}
+                                                                    className="w-full bg-slate-950/65 border border-slate-700 rounded py-1 pl-2 pr-6 text-xs text-slate-205 text-slate-200 focus:ring-amber-500 focus:border-amber-500 transition font-sans"
+                                                                    placeholder="0"
+                                                                />
+                                                                <span className="absolute inset-y-0 right-1.5 flex items-center text-[8px] text-slate-500 font-sans">Unit</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Serving Time */}
+                                                        <div>
+                                                            <label className="block text-[10px] font-medium text-slate-400 mb-1 font-sans">Serving Time</label>
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    value={loader.servingTime}
+                                                                    onChange={(e) => handleUpdateLoaderDecimal(loader.id, 'servingTime', e.target.value)}
+                                                                    className="w-full bg-slate-950/65 border border-slate-700 rounded py-1 pl-2 pr-6 text-xs text-slate-205 text-slate-200 focus:ring-amber-500 focus:border-amber-500 transition font-sans"
+                                                                    placeholder="0.0"
+                                                                />
+                                                                <span className="absolute inset-y-0 right-1.5 flex items-center text-[8px] text-slate-500 font-sans">Min</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Cycle Time HD */}
+                                                        <div>
+                                                            <label className="block text-[10px] font-medium text-slate-400 mb-1 font-sans truncate">Cycle Time HD</label>
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    value={loader.cycleTimeHD}
+                                                                    onChange={(e) => handleUpdateLoaderDecimal(loader.id, 'cycleTimeHD', e.target.value)}
+                                                                    className="w-full bg-slate-950/65 border border-slate-700 rounded py-1 pl-2 pr-6 text-xs text-slate-205 text-slate-200 focus:ring-amber-500 focus:border-amber-500 transition font-sans"
+                                                                    placeholder="0.0"
+                                                                />
+                                                                <span className="absolute inset-y-0 right-1.5 flex items-center text-[8px] text-slate-500 font-sans">Min</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Result calculations panel inside */}
+                                                    <div className="grid grid-cols-2 gap-2.5 font-sans">
+                                                        {/* Match Factor Result */}
+                                                        <div className="bg-slate-950/50 p-2 rounded border border-slate-900">
+                                                            <span className="text-[9px] text-slate-500 uppercase font-semibold block font-sans">MF Status</span>
+                                                            <span className="text-sm font-extrabold text-slate-100 block mt-0.5">
+                                                                {hdCount && servTime && cycTime ? mfAktual.toFixed(2) : '-'}
+                                                            </span>
+                                                            <span className="text-[8px] text-slate-500 block font-mono leading-tight mt-0.5">
+                                                                ({hdCount.toFixed(0)} × {servTime.toFixed(1)}) / {cycTime.toFixed(1)}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Loader Idle Result */}
+                                                        <div className="bg-slate-950/50 p-2 rounded border border-slate-900">
+                                                            <span className="text-[9px] text-slate-500 uppercase font-semibold block font-sans">Lama Loader Idle</span>
+                                                            <span className="text-sm font-extrabold text-slate-100 block mt-0.5">
+                                                                {hdCount && servTime && cycTime ? `${loaderIdle.toFixed(1)} Menit` : '-'}
+                                                            </span>
+                                                            <span className="text-[8px] text-slate-500 block font-mono leading-tight mt-0.5">
+                                                                60 - ({hdCount && servTime && cycTime ? mfAktual.toFixed(2) : '-'} × 60)
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Progress ratio */}
+                                                    {hdCount > 0 && servTime > 0 && cycTime > 0 && (
+                                                        <div className="space-y-0.5 text-[10px]">
+                                                            <div className="flex justify-between text-slate-400">
+                                                                <span className="font-sans">Rasio Loader Wait/Idle</span>
+                                                                <span className="font-sans">{loaderIdle > 0 ? `${idlePercentage.toFixed(0)}% dari 1 jam` : '0% (Tidak idle)'}</span>
+                                                            </div>
+                                                            <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                                                                <div 
+                                                                    className={`h-full rounded-full transition-all duration-300 ${percentageColor}`} 
+                                                                    style={{ width: `${loaderIdle > 0 ? idlePercentage : 0}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Monitoring Cek Bugar section inside loader card */}
+                                            <div className="space-y-2 pt-2 border-t border-slate-700/20">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-1">
+                                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                                        <ClockIcon className="h-4 w-4 text-amber-500" />
+                                                        <span className="text-xs font-bold text-slate-205 text-slate-200">Monitoring Cek Bugar</span>
+                                                        <span className="text-[10px] text-amber-500/85 italic font-medium">
+                                                            * HD wajib bergantian masuk changeshift
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-2 justify-between sm:justify-start">
+                                                        <span className="text-[9px] text-slate-400 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded font-mono font-medium">
+                                                            {hdUnits.length} Unit HD
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleToggleStopwatches(loader.id)}
+                                                            className="text-[10px] text-slate-405 text-slate-400 hover:text-slate-200 underline cursor-pointer select-none"
+                                                        >
+                                                            {loader.showStopwatches !== false ? 'Sembunyikan' : 'Tampilkan'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Stopwatch list */}
+                                                {loader.showStopwatches !== false && (
+                                                    hdUnits.length === 0 ? (
+                                                        <div className="text-center py-2.5 bg-slate-950/20 rounded border border-dashed border-slate-800/80">
+                                                            <p className="text-[10px] text-slate-500 italic">
+                                                                Silakan isi "Jumlah HD" di parameter di atas untuk memulai monitoring.
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fade-in text-left">
+                                                            {hdUnits.map((hd) => {
+                                                                const rawTime = hd.time + (hd.isRunning && hd.startTime ? (Date.now() - hd.startTime) : 0);
+                                                                return (
+                                                                    <div 
+                                                                        key={`${loader.id}-hd-${hd.id}`}
+                                                                        className="grid grid-cols-12 items-center bg-slate-950/40 p-1.5 rounded border border-slate-800/80 hover:border-slate-705 transition-all gap-2"
+                                                                    >
+                                                                        {/* Name input */}
+                                                                        <div className="col-span-5 flex items-center gap-1">
+                                                                            <span className="text-[9px] text-slate-500 font-mono shrink-0">Unit:</span>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={hd.unitName}
+                                                                                onChange={(e) => handleUpdateHDName(loader.id, hd.id, e.target.value)}
+                                                                                className="bg-slate-950 border border-slate-850 rounded px-1.5 py-0.5 text-[10px] text-indigo-400 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500/50 w-full"
+                                                                                placeholder="HD1234"
+                                                                            />
+                                                                        </div>
+
+                                                                        {/* Timer and action buttons */}
+                                                                        <div className="col-span-7 flex items-center justify-between gap-1">
+                                                                            {/* Timer */}
+                                                                            <div className="bg-slate-950 px-1 py-0.5 border border-slate-850 rounded font-mono text-[11px] font-bold text-emerald-400 tracking-tight text-center flex-grow select-none">
+                                                                                {formatStopwatch(rawTime)}
+                                                                            </div>
+
+                                                                            {/* Controls */}
+                                                                            <div className="flex items-center gap-0.5 shrink-0">
+                                                                                {hd.isRunning ? (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => handleStopStopwatch(loader.id, hd.id)}
+                                                                                        className="p-1 bg-red-650/20 hover:bg-red-650/30 text-rose-500 border border-red-500/20 rounded transition-all active:scale-[0.98] select-none cursor-pointer"
+                                                                                        title="STOP"
+                                                                                    >
+                                                                                        <StopIcon className="h-2.5 w-2.5" />
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => handleStartStopwatch(loader.id, hd.id)}
+                                                                                        className="p-1 bg-emerald-650/20 hover:bg-emerald-650/30 text-emerald-400 border border-emerald-500/20 rounded transition-all active:scale-[0.98] select-none cursor-pointer"
+                                                                                        title="START"
+                                                                                    >
+                                                                                        <PlayIcon className="h-2.5 w-2.5" />
+                                                                                    </button>
+                                                                                )}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleResetStopwatch(loader.id, hd.id)}
+                                                                                    className="p-1 bg-slate-800 hover:bg-slate-750 text-slate-350 border border-slate-700/20 rounded transition-all active:scale-[0.98] select-none cursor-pointer"
+                                                                                    title="RESET"
+                                                                                >
+                                                                                    <RotateCcwIcon className="h-2.5 w-2.5" />
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                             })}
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Right Column: Sticky Resume Card */}
+                            <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4 lg:self-start">
+                                <div className="bg-slate-800/20 rounded-xl border border-slate-700/40 p-4 space-y-4 animate-fade-in shadow-xl text-left">
+                                    <div className="border-b border-slate-700/40 pb-2 flex items-center justify-between">
+                                        <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
+                                            <ChartBarIcon className="h-4.5 w-4.5 text-amber-500" />
+                                            <span>Resume Delay &amp; Idle</span>
+                                        </h3>
+                                    </div>
+
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-xs font-sans text-slate-300">
+                                            <thead>
+                                                <tr className="border-b border-slate-800 text-[9px] text-slate-305 text-slate-500 uppercase tracking-tight font-semibold">
+                                                    <th className="py-2.5 px-1">Unit Loader</th>
+                                                    <th className="py-2.5 px-1 text-center font-normal">Idle by MF (m)</th>
+                                                    <th className="py-2.5 px-1 text-center font-normal text-indigo-400">Delay CS (m)</th>
+                                                    <th className="py-2.5 px-1 text-right text-amber-400 font-bold whitespace-nowrap">Total Idle (m)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-800/40">
+                                                {loaders.map((loader) => {
+                                                    const count = parseFloat(loader.jumlahHD) || 0;
+                                                    const servTime = parseFloat(loader.servingTime) || 0;
+                                                    const cycTime = parseFloat(loader.cycleTimeHD) || 0;
+
+                                                    let mfAktual = 0;
+                                                    let loaderIdle = 0;
+                                                    let delayCS = 0;
+                                                    let totalPCIdle = 0;
+                                                    let totalTimeMs = 0;
+
+                                                    if (count > 0 && servTime > 0 && cycTime > 0) {
+                                                        mfAktual = (count * servTime) / cycTime;
+                                                        loaderIdle = mfAktual >= 1 ? 0 : 60 - (mfAktual * 60);
+
+                                                        totalTimeMs = loader.hdUnits
+                                                            ? loader.hdUnits.reduce((acc, hd) => {
+                                                                const rawTime = hd.time + (hd.isRunning && hd.startTime ? (Date.now() - hd.startTime) : 0);
+                                                                return acc + rawTime;
+                                                            }, 0)
+                                                            : 0;
+                                                        const totalTimeMinutes = totalTimeMs / (1000 * 60);
+
+                                                        const mfPart = ((count - 1) * servTime) / cycTime;
+                                                        const fraction = mfAktual - mfPart;
+                                                        delayCS = totalTimeMinutes * fraction;
+                                                        totalPCIdle = loaderIdle + delayCS;
+                                                    }
+
+                                                    return (
+                                                        <tr key={`resume-${loader.id}`} className="hover:bg-slate-800/5 transition-colors font-sans text-[11px]">
+                                                            <td className="py-2.5 px-1 font-semibold text-slate-200 font-mono uppercase">
+                                                                {loader.name || `EX${1216 + parseInt(loader.id)}`}
+                                                            </td>
+                                                            <td className="py-2 px-1 text-center font-mono text-slate-300">
+                                                                {loaderIdle.toFixed(2)}
+                                                            </td>
+                                                            <td className="py-2 px-1 text-center font-mono text-indigo-400">
+                                                                {delayCS.toFixed(2)}
+                                                                <span className="text-[9px] text-slate-500 block">
+                                                                    ({((totalTimeMs || 0)/(60000)).toFixed(1)}m × {(mfAktual - (((count-1)*servTime)/cycTime)).toFixed(2)})
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-2.5 px-1 text-right font-mono font-bold text-amber-400 bg-amber-500/5 rounded">
+                                                                {totalPCIdle.toFixed(2)}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
