@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon } from './icons';
+import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon } from './icons';
 
 type Status = 'good' | 'bad' | 'neutral';
 
@@ -289,10 +289,11 @@ const ProductivityTable: React.FC = () => (
 
 
 const CycleTime: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<'observasi' | 'prestasi' | 'referensi'>('observasi');
     const [jarak, setJarak] = useState('');
     const [jumlahHD, setJumlahHD] = useState('');
     const [servingTime, setServingTime] = useState('');
-    const [aktualCycleTime, setAktualCycleTime] = useState(''); // This is "Front-Disposal-Front Time"
+    const [aktualCycleTime, setAktualCycleTime] = useState(''); // This is "Travel Time + Dumping"
     const [totalAktualCycleTime, setTotalAktualCycleTime] = useState<number | null>(null);
     const [planCycleTime, setPlanCycleTime] = useState<number | null>(null);
     const [rekomendasiWaktuTravel, setRekomendasiWaktuTravel] = useState<number | null>(null);
@@ -327,7 +328,7 @@ const CycleTime: React.FC = () => {
 
     useEffect(() => {
         const servTime = parseFloat(servingTime);
-        const fdfTime = parseFloat(aktualCycleTime); // Front-Disposal-Front Time
+        const fdfTime = parseFloat(aktualCycleTime); // Travel Time + Dumping
 
         if (!isNaN(servTime) && servTime > 0 && !isNaN(fdfTime) && fdfTime > 0) {
             setTotalAktualCycleTime(servTime + fdfTime);
@@ -557,64 +558,300 @@ const CycleTime: React.FC = () => {
     }, [mfMikro, predictiveRitasi, potensialHangingActual, servingTime, totalAktualCycleTime, planCycleTime, jarak, jumlahHD, aktualCycleTime]);
 
 
+    // Tab "Prestasi" calculations
+    const distanceVal = parseFloat(jarak);
+    const hdCountVal = parseInt(jumlahHD, 10);
+    const servTimeVal = parseFloat(servingTime);
+    const actCycleTimeNum = totalAktualCycleTime;
+
+    const isDataValid = !isNaN(distanceVal) && distanceVal > 0 &&
+                        !isNaN(hdCountVal) && hdCountVal > 0 &&
+                        !isNaN(servTimeVal) && servTimeVal > 0 &&
+                        actCycleTimeNum !== null && actCycleTimeNum > 0;
+
+    const getRowData = (rowHD: number) => {
+        const numerator = actCycleTimeNum - (rowHD * servTimeVal);
+        const hangingValue = numerator < 0 ? 0 : numerator / rowHD;
+        
+        const mf = (rowHD * servTimeVal) / actCycleTimeNum;
+        
+        const denominator = servTimeVal + hangingValue;
+        const ritasi = denominator > 0 ? (60 / denominator) : 0;
+        
+        const loaderProductivity = ritasi * 41;
+        const conversionVal = getProductivityConversion(distanceVal);
+        const haulerProductivity = conversionVal && conversionVal > 0 
+            ? ((ritasi / rowHD * 41) / conversionVal) 
+            : 0;
+
+        return {
+            mf,
+            ritasi,
+            loaderProductivity,
+            haulerProductivity,
+        };
+    };
+
+    // Calculate row variations around actual HD count: from -2 to +3
+    const prestasiRows = isDataValid
+        ? [-2, -1, 0, 1, 2, 3]
+            .map((offset) => {
+                const rowHD = hdCountVal + offset;
+                return {
+                    offset,
+                    rowHD,
+                    ...getRowData(rowHD),
+                };
+            })
+            .filter((row) => row.rowHD > 0)
+        : [];
+
     return (
-        <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* Left Column: Input & Results */}
-            <div className="lg:col-span-1 space-y-8">
-                <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700/50">
-                    <h2 className="text-xl font-semibold mb-6 text-slate-200">Input Data Aktual</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <InputField id="jarak" label="Jarak" value={jarak} onChange={handleDecimalChange(setJarak)} unit="km" />
-                        <InputField id="jumlahHD" label="Jumlah HD" value={jumlahHD} onChange={handleIntegerChange(setJumlahHD)} unit="unit" />
-                        <InputField id="servingTime" label="Serving Time" value={servingTime} onChange={handleDecimalChange(setServingTime)} unit="menit" />
-                        <InputField id="aktualCycleTime" label="Front-Disposal-Front Time" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                    <div className="col-span-2">
-                        <Card 
-                            title="Rekomendasi Waktu Travel" 
-                            value={rekomendasiWaktuTravel !== null ? `${rekomendasiWaktuTravel.toFixed(1)} Menit` : '-'} 
-                            align="center"
-                        />
-                    </div>
-                    <Card title="Jarak" value={jarak ? `${jarak} km` : '-'} icon={<RouteIcon className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-400" />} />
-                    <Card title="Jumlah HD" value={jumlahHD ? `${jumlahHD} Unit` : '-'} icon={<MiningTruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />} />
-                    <Card title="Plan Cycle Time by Jarak" value={planCycleTime ? `${planCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} />
-                    <Card title="Cycle Time HD Aktual" value={totalAktualCycleTime ? `${totalAktualCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} status={cycleTimeStatus} />
-                    <Card title="Serving Time Plan" value="3,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
-                    <Card title="Serving Time Aktual" value={servingTime ? `${servingTime} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} status={servingTimeStatus} />
-                    <Card title="Toleransi Hanging/Waiting HD" value="0,35 Menit/Rit" icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} />
-                    <Card title="Potensial Hanging/Waiting HD Aktual" value={potensialHangingActual !== null ? `${potensialHangingActual.toFixed(1)} Menit/Rit` : '-'} icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} status={hangingStatus} />
-                    <Card title="Predictive Ritasi per Jam" value={predictiveRitasi ? `${predictiveRitasi.toFixed(1)} Rit` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-sky-400" />} status={ritasiStatus} />
-                    <Card title="MF Mikro" value={mfMikro !== null ? mfMikro.toFixed(2) : '-'} icon={<GearIcon className="h-5 w-5 sm:h-6 sm:w-6 text-teal-400" />} status={mfMikroStatus} />
-                    <Card title="Predictive Productivity Loader" value={predictiveProductivityLoader !== null ? `${predictiveProductivityLoader.toFixed(1)}` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} status={loaderProductivityStatus} />
-                    <Card title="Predictive Productivity Hauler" value={predictiveProductivityHauler !== null ? `${predictiveProductivityHauler.toFixed(1)}` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-fuchsia-400" />} status={haulerProductivityStatus} />
-                </div>
-                <SuggestionsBox suggestions={suggestions} />
+        <div className="space-y-4">
+            {/* Tabs Navigation */}
+            <div className="flex border-b border-slate-700/60 pb-px">
+                <button
+                    onClick={() => setActiveTab('observasi')}
+                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
+                        activeTab === 'observasi'
+                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
+                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
+                    }`}
+                >
+                    <RouteIcon className="h-4 w-4" />
+                    <span>Observasi</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('prestasi')}
+                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
+                        activeTab === 'prestasi'
+                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
+                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
+                    }`}
+                >
+                    <ChartBarIcon className="h-4 w-4" />
+                    <span>Prestasi</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('referensi')}
+                    className={`px-4 py-2 sm:py-2.5 font-semibold text-sm transition-all duration-150 border-b-2 flex items-center gap-2 cursor-pointer ${
+                        activeTab === 'referensi'
+                            ? 'border-amber-500 text-amber-500 bg-amber-500/5'
+                            : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/10'
+                    }`}
+                >
+                    <BookOpenIcon className="h-4 w-4" />
+                    <span>Referensi</span>
+                </button>
             </div>
 
-            {/* Right Column: Details */}
-            <div className="lg:col-span-1">
-                 <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700/50">
-                    <h2 className="text-xl font-semibold text-slate-200 mb-6">Detail Konten</h2>
-                    <div className="space-y-8">
-                        <div>
-                            <h3 className="text-lg font-semibold text-slate-200 mb-4">Tabel Plan Cycle Time by Jarak</h3>
-                            <PlanCycleTimeTable />
+            {activeTab === 'observasi' && (
+                <div className="animate-fade-in space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        {/* Left Column: Input Data */}
+                        <div className="space-y-6">
+                            <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700/50">
+                                <h2 className="text-lg font-semibold mb-4 text-slate-200">Input Data Aktual</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                    <InputField id="jarak" label="Jarak" value={jarak} onChange={handleDecimalChange(setJarak)} unit="km" />
+                                    <InputField id="jumlahHD" label="Jumlah HD" value={jumlahHD} onChange={handleIntegerChange(setJumlahHD)} unit="unit" />
+                                    <InputField id="servingTime" label="Serving Time" value={servingTime} onChange={handleDecimalChange(setServingTime)} unit="menit" />
+                                    <InputField id="aktualCycleTime" label="Travel Time + Dumping" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
+                                </div>
+                                <button
+                                    onClick={() => setActiveTab('prestasi')}
+                                    className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98] cursor-pointer"
+                                >
+                                    <ChartBarIcon className="h-4 w-4" />
+                                    <span>Lihat Prestasi</span>
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-slate-200 mb-4">Tabel Plan Speed by Jarak</h3>
-                            <SpeedTable />
+
+                        {/* Right Column: Output Cards */}
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                                <div className="col-span-2">
+                                    <Card 
+                                        title="Rekomendasi Waktu Travel" 
+                                        value={rekomendasiWaktuTravel !== null ? `${rekomendasiWaktuTravel.toFixed(1)} Menit` : '-'} 
+                                        align="center"
+                                    />
+                                </div>
+                                <Card title="Jarak" value={jarak ? `${jarak} km` : '-'} icon={<RouteIcon className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-400" />} />
+                                <Card title="Jumlah HD" value={jumlahHD ? `${jumlahHD} Unit` : '-'} icon={<MiningTruckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />} />
+                                <Card title="Plan Cycle Time by Jarak" value={planCycleTime ? `${planCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} />
+                                <Card title="Cycle Time HD Aktual" value={totalAktualCycleTime ? `${totalAktualCycleTime.toFixed(1)} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />} status={cycleTimeStatus} />
+                                <Card title="Serving Time Plan" value="3,73 Menit" icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} />
+                                <Card title="Serving Time Aktual" value={servingTime ? `${servingTime} Menit` : '-'} icon={<ClockIcon className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-400" />} status={servingTimeStatus} />
+                                <Card title="Toleransi Hanging/Waiting HD" value="0,35 Menit/Rit" icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} />
+                                <Card title="Potensial Hanging/Waiting HD Aktual" value={potensialHangingActual !== null ? `${potensialHangingActual.toFixed(1)} Menit/Rit` : '-'} icon={<HourglassIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />} status={hangingStatus} />
+                                <Card title="Predictive Ritasi per Jam" value={predictiveRitasi ? `${predictiveRitasi.toFixed(1)} Rit` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-sky-400" />} status={ritasiStatus} />
+                                <Card title="MF Mikro" value={mfMikro !== null ? mfMikro.toFixed(2) : '-'} icon={<GearIcon className="h-5 w-5 sm:h-6 sm:w-6 text-teal-400" />} status={mfMikroStatus} />
+                                <Card title="Predictive Productivity Loader" value={predictiveProductivityLoader !== null ? `${predictiveProductivityLoader.toFixed(1)}` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-rose-400" />} status={loaderProductivityStatus} />
+                                <Card title="Predictive Productivity Hauler" value={predictiveProductivityHauler !== null ? `${predictiveProductivityHauler.toFixed(1)}` : '-'} icon={<ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6 text-fuchsia-400" />} status={haulerProductivityStatus} />
+                            </div>
                         </div>
-                         <div>
-                            <h3 className="text-lg font-semibold text-slate-200 mb-4">Tabel Konversi Produktivitas HD by Jarak</h3>
-                            <ProductivityTable />
+                    </div>
+                    {/* Suggestions (Keterangan) at the very bottom, spanning full width */}
+                    <SuggestionsBox suggestions={suggestions} />
+                </div>
+            )}
+
+            {activeTab === 'prestasi' && (
+                <div className="animate-fade-in space-y-4">
+                    {!isDataValid ? (
+                        <div className="bg-slate-800/30 border border-slate-700/50 p-6 sm:p-8 rounded-lg text-center max-w-xl mx-auto space-y-4">
+                            <HourglassIcon className="h-10 w-10 text-amber-500/50 mx-auto animate-pulse" />
+                            <h3 className="text-base font-semibold text-slate-200">Data Observasi Belum Lengkap</h3>
+                            <p className="text-slate-400 text-xs leading-relaxed">
+                                Silakan lengkapi input data aktual (**Jarak, Jumlah HD, Serving Time, dan Travel Time + Dumping**) di tab <span className="font-semibold text-amber-500">Observasi</span> terlebih dahulu untuk melihat analisis dan simulasi perbandingan performa ("Prestasi") alat angkut.
+                            </p>
+                            <button
+                                onClick={() => setActiveTab('observasi')}
+                                className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-md font-medium text-xs transition-all border border-amber-500/30 cursor-pointer"
+                            >
+                                Lengkapi Data Sekarang
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {/* Prestasi Table Container */}
+                            <div className="overflow-x-auto border border-slate-700/50 rounded-lg shadow-xl bg-slate-900/50 md:overflow-x-visible">
+                                <table className="w-full text-[10px] sm:text-xs md:text-sm text-left text-slate-300">
+                                    <thead className="text-[9px] sm:text-xs text-slate-200 uppercase bg-slate-800 border-b border-slate-700">
+                                        <tr>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">Jarak<br/><span className="text-[8px] sm:text-[9px] font-normal text-slate-400 lowercase">(km)</span></th>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                <span className="hidden sm:inline">Cycle Time</span>
+                                                <span className="sm:hidden">CT</span> Aktual
+                                                <br/>
+                                                <span className="text-[8px] sm:text-[9px] font-normal text-slate-400 lowercase">(menit)</span>
+                                            </th>
+                                            <th scope="col" className="px-1.5 py-1.5 sm:px-4 sm:py-2.5 text-center font-semibold bg-slate-800/80 border-x border-slate-700/50">
+                                                <span className="hidden sm:inline">Simulasi jumlah HD</span>
+                                                <span className="sm:hidden">Simulasi HD</span>
+                                            </th>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">MF<span className="hidden sm:inline"> Aktual</span></th>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                <span className="hidden md:inline">Predictive </span>Ritasi
+                                                <br/>
+                                                <span className="text-[8px] sm:text-[9px] font-normal text-slate-400 lowercase">(rit/jam)</span>
+                                            </th>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                <span className="hidden md:inline">Predictive </span>Loader
+                                                <br/>
+                                                <span className="text-[8px] sm:text-[9px] font-normal text-slate-400 lowercase">(bcm/jam)</span>
+                                            </th>
+                                            <th scope="col" className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                <span className="hidden md:inline">Predictive </span>Hauler
+                                                <br/>
+                                                <span className="text-[8px] sm:text-[9px] font-normal text-slate-400 lowercase">(bcm/jam)</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                                                        <tbody className="divide-y divide-slate-800">
+                                         {prestasiRows.map((row, idx) => {
+                                             const isActualRow = row.offset === 0;
+                                             return (
+                                                 <tr 
+                                                     key={row.rowHD} 
+                                                     className={`hover:bg-slate-800/60 transition ${
+                                                         isActualRow 
+                                                             ? 'bg-amber-500/10 border-y border-amber-500/30 font-semibold text-slate-100' 
+                                                             : idx % 2 === 0 ? 'bg-slate-800/20' : 'bg-transparent'
+                                                     }`}
+                                                 >
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-medium">
+                                                         {distanceVal.toFixed(1)}
+                                                     </td>
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-medium">
+                                                         {actCycleTimeNum.toFixed(1)}
+                                                     </td>
+                                                     <td className={`px-1.5 py-1.5 sm:px-4 sm:py-2.5 text-center font-bold text-xs sm:text-base border-x border-slate-800/50 ${
+                                                         isActualRow ? 'text-amber-400 bg-amber-500/10' : 'text-slate-100 bg-slate-800/10'
+                                                     }`}>
+                                                         <div className="flex items-center justify-center gap-1">
+                                                             <span>{row.rowHD}</span>
+                                                             {isActualRow && (
+                                                                 <>
+                                                                     <span className="px-1 py-0.5 text-[8px] font-semibold text-amber-900 bg-amber-400 rounded hidden sm:inline-block">Aktual</span>
+                                                                     <span className="h-1.5 w-1.5 rounded-full bg-amber-400 sm:hidden inline-block ml-0.5 animate-pulse" title="Aktual" />
+                                                                 </>
+                                                             )}
+                                                         </div>
+                                                     </td>
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center">
+                                                         <div className="flex justify-center">
+                                                             {row.mf >= 0.9 && row.mf <= 1.0 ? (
+                                                                 <span className="px-1 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs font-semibold text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-sm flex items-center justify-center gap-0.5 sm:gap-1">
+                                                                     <CheckCircleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 hidden sm:inline-block" /> {row.mf.toFixed(2)}
+                                                                 </span>
+                                                             ) : row.mf > 1.0 ? (
+                                                                 <span className="px-1 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs font-semibold text-yellow-500 bg-yellow-500/10 rounded-full border border-yellow-500/20 shadow-sm">
+                                                                      {row.mf.toFixed(2)}
+                                                                      <span className="hidden sm:inline"> (Queue)</span>
+                                                                      <span className="sm:hidden text-[8px]"> (Q)</span>
+                                                                 </span>
+                                                             ) : (
+                                                                 <span className="px-1 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs font-semibold text-rose-500 bg-rose-500/10 rounded-full border border-rose-500/20 shadow-sm">
+                                                                      {row.mf.toFixed(2)}
+                                                                      <span className="hidden sm:inline"> (Idle)</span>
+                                                                      <span className="sm:hidden text-[8px]"> (I)</span>
+                                                                 </span>
+                                                             )}
+                                                         </div>
+                                                     </td>
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                         <span className={row.ritasi >= 14 ? 'text-emerald-400' : 'text-rose-500'}>
+                                                             {row.ritasi.toFixed(1)}
+                                                         </span>
+                                                     </td>
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                         <span className={row.loaderProductivity >= 540 ? 'text-emerald-400' : 'text-rose-500'}>
+                                                             {row.loaderProductivity.toFixed(1)}
+                                                         </span>
+                                                     </td>
+                                                     <td className="px-1 py-1.5 sm:px-3 sm:py-2.5 text-center font-semibold">
+                                                         <span className={row.haulerProductivity >= 231 ? 'text-emerald-400' : 'text-rose-500'}>
+                                                             {row.haulerProductivity.toFixed(1)}
+                                                         </span>
+                                                     </td>
+                                                 </tr>
+                                             );
+                                         })}
+                                     </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {activeTab === 'referensi' && (
+                <div className="animate-fade-in">
+                    <div className="bg-slate-800/50 p-5 rounded-lg border border-slate-700/50">
+                        <h2 className="text-lg font-semibold text-slate-200 mb-6 flex items-center gap-2">
+                            <BookOpenIcon className="h-5 w-5 text-amber-500" />
+                            <span>Referensi Standar &amp; Parameter Ideal</span>
+                        </h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-800">
+                                <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Plan Cycle Time by Jarak</h3>
+                                <PlanCycleTimeTable />
+                            </div>
+                            <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-800">
+                                <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Plan Speed by Jarak</h3>
+                                <SpeedTable />
+                            </div>
+                            <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-800">
+                                <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Konversi Produktivitas by Jarak</h3>
+                                <ProductivityTable />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
