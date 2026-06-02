@@ -1401,22 +1401,22 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
 
                             {/* Right Column: Sticky Resume Card */}
                             <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-4 lg:self-start">
-                                <div className="bg-slate-800/20 rounded-xl border border-slate-700/40 p-4 space-y-4 animate-fade-in shadow-xl text-left">
-                                    <div className="border-b border-slate-700/40 pb-2 flex items-center justify-between">
-                                        <h3 className="text-sm font-bold text-slate-100 flex items-center gap-1.5">
-                                            <ChartBarIcon className="h-4.5 w-4.5 text-amber-500" />
+                                <div className="bg-slate-800/20 rounded-xl border border-slate-700/40 p-2.5 sm:p-4 space-y-3 sm:space-y-4 animate-fade-in shadow-xl text-left">
+                                    <div className="border-b border-slate-700/40 pb-1.5 sm:pb-2 flex items-center justify-between">
+                                        <h3 className="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-1 sm:gap-1.5">
+                                            <ChartBarIcon className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5 text-amber-500" />
                                             <span>Resume Delay &amp; Idle</span>
                                         </h3>
                                     </div>
 
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left text-xs font-sans text-slate-300">
+                                    <div className="overflow-x-auto select-none">
+                                        <table className="w-full text-left text-[11px] sm:text-xs font-sans text-slate-300">
                                             <thead>
-                                                <tr className="border-b border-slate-800 text-[9px] text-slate-305 text-slate-500 uppercase tracking-tight font-semibold">
-                                                    <th className="py-2.5 px-1">Unit Loader</th>
-                                                    <th className="py-2.5 px-1 text-center font-normal">Idle by MF (m)</th>
-                                                    <th className="py-2.5 px-1 text-center font-normal text-indigo-400">Delay CS (m)</th>
-                                                    <th className="py-2.5 px-1 text-right text-amber-400 font-bold whitespace-nowrap">Total Idle (m)</th>
+                                                <tr className="border-b border-slate-800 text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-tight font-semibold">
+                                                    <th className="py-1.5 sm:py-2.5 px-0.5 sm:px-1">Unit Loader</th>
+                                                    <th className="py-1.5 sm:py-2.5 px-0.5 sm:px-1 text-center font-normal">Idle by MF (m)</th>
+                                                    <th className="py-1.5 sm:py-2.5 px-0.5 sm:px-1 text-center font-normal text-indigo-400">Delay CS (m)</th>
+                                                    <th className="py-1.5 sm:py-2.5 px-0.5 sm:px-1 text-right text-amber-400 font-bold whitespace-nowrap">Total Idle (m)</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-slate-800/40">
@@ -1445,24 +1445,24 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
 
                                                         const fraction = 1 - (((count - 1) * servTime) / cycTime);
                                                         delayCS = fraction * totalTimeMinutes;
-                                                        totalPCIdle = (60 - totalTimeMinutes) - ((mfAktual * (60 - totalTimeMinutes)) + delayCS);
+                                                        totalPCIdle = delayCS + ((1 - mfAktual) * (60 - totalTimeMinutes));
                                                     }
 
                                                     return (
-                                                        <tr key={`resume-${loader.id}`} className="hover:bg-slate-800/5 transition-colors font-sans text-[11px]">
-                                                            <td className="py-2.5 px-1 font-semibold text-slate-200 font-mono uppercase">
+                                                        <tr key={`resume-${loader.id}`} className="hover:bg-slate-800/5 transition-colors font-sans text-[10px] sm:text-[11px]">
+                                                            <td className="py-1.5 sm:py-2.5 px-0.5 sm:px-1 font-semibold text-slate-200 font-mono uppercase">
                                                                 {loader.name || `EX${1216 + parseInt(loader.id)}`}
                                                             </td>
-                                                            <td className="py-2 px-1 text-center font-mono text-slate-300">
+                                                            <td className="py-1.5 sm:py-2 px-0.5 sm:px-1 text-center font-mono text-slate-300">
                                                                 {loaderIdle.toFixed(2)}
                                                             </td>
-                                                            <td className="py-2 px-1 text-center font-mono text-indigo-400">
+                                                            <td className="py-1.5 sm:py-2 px-0.5 sm:px-1 text-center font-mono text-indigo-400">
                                                                 {delayCS.toFixed(2)}
-                                                                <span className="text-[9px] text-slate-500 block">
+                                                                <span className="text-[7.5px] sm:text-[9px] text-slate-500 block leading-tight">
                                                                     ({((totalTimeMs || 0)/(60000)).toFixed(1)}m × {(1 - (((count - 1) * servTime) / cycTime)).toFixed(2)})
                                                                 </span>
                                                             </td>
-                                                            <td className="py-2.5 px-1 text-right font-mono font-bold text-amber-400 bg-amber-500/5 rounded">
+                                                            <td className="py-1.5 sm:py-2.5 px-0.5 sm:px-1 text-right font-mono font-bold text-amber-400 bg-amber-500/5 rounded">
                                                                 {totalPCIdle.toFixed(2)}
                                                             </td>
                                                         </tr>
