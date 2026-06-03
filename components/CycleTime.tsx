@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StopwatchCSLoader } from './StopwatchCSLoader';
+import { HaulerSimulation } from './HaulerSimulation';
 import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, TimerIcon, TrashIcon, PlusIcon, PlayIcon, StopIcon, RotateCcwIcon, WhatsappIcon } from './icons';
 
 type Status = 'good' | 'bad' | 'neutral';
@@ -886,7 +887,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                             <InputField id="jarak" label="Jarak" value={jarak} onChange={handleDecimalChange(setJarak)} unit="km" />
                                             <InputField id="jumlahHD" label="Jumlah HD" value={jumlahHD} onChange={handleIntegerChange(setJumlahHD)} unit="unit" />
                                             <InputField id="servingTime" label="Serving Time" value={servingTime} onChange={handleDecimalChange(setServingTime)} unit="menit" />
-                                            <InputField id="aktualCycleTime" label="Travel Time + Dumping" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
+                                            <InputField id="aktualCycleTime" label="Travel + Disposal Time" value={aktualCycleTime} onChange={handleDecimalChange(setAktualCycleTime)} unit="menit" />
                                         </div>
                                         <button
                                             onClick={() => setActiveTab('prestasi')}
@@ -909,7 +910,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                             <div>Jarak: <span className="font-mono text-amber-400 font-bold">{jarak ? `${jarak} km` : '-'}</span></div>
                                             <div>Jumlah HD: <span className="font-mono text-amber-400 font-bold">{jumlahHD ? `${jumlahHD} unit` : '-'}</span></div>
                                             <div>Serving Time: <span className="font-mono text-amber-400 font-bold">{servingTime ? `${servingTime} m` : '-'}</span></div>
-                                            <div>Travel + Dump: <span className="font-mono text-amber-400 font-bold">{aktualCycleTime ? `${aktualCycleTime} m` : '-'}</span></div>
+                                            <div>Travel + Disposal: <span className="font-mono text-amber-400 font-bold">{aktualCycleTime ? `${aktualCycleTime} m` : '-'}</span></div>
                                         </div>
                                         <button 
                                             onClick={() => setShowInputData(true)}
@@ -959,7 +960,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                             <HourglassIcon className="h-10 w-10 text-amber-500/50 mx-auto animate-pulse" />
                             <h3 className="text-base font-semibold text-slate-200">Data Observasi Belum Lengkap</h3>
                             <p className="text-slate-400 text-xs leading-relaxed">
-                                Silakan lengkapi input data aktual (**Jarak, Jumlah HD, Serving Time, dan Travel Time + Dumping**) di tab <span className="font-semibold text-amber-500">Observasi</span> terlebih dahulu untuk melihat analisis dan simulasi perbandingan performa ("Prestasi") alat angkut.
+                                Silakan lengkapi input data aktual (**Jarak, Jumlah HD, Serving Time, dan Travel + Disposal Time**) di tab <span className="font-semibold text-amber-500">Observasi</span> terlebih dahulu untuk melihat analisis dan simulasi perbandingan performa ("Prestasi") alat angkut.
                             </p>
                             <button
                                 onClick={() => setActiveTab('observasi')}
@@ -1077,6 +1078,12 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                                      </tbody>
                                 </table>
                             </div>
+                            <HaulerSimulation 
+                              distance={distanceVal}
+                              actualHdCount={hdCountVal}
+                              servingTime={servTimeVal}
+                              aktualCycleTime={actCycleTimeNum || 0}
+                            />
                         </div>
                     )}
                 </div>
