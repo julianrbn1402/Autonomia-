@@ -1516,9 +1516,9 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
 
             {activeTab === 'about' && (
                 <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 sm:p-8 max-w-3xl mx-auto space-y-6 text-left shadow-xl backdrop-blur-md animate-fade-in font-sans">
-                    <div className="flex items-center gap-3 pb-4 border-b border-slate-700/50">
-                        <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-500">
-                            <LightbulbIcon className="h-6 w-6 shrink-0" />
+                    <div className="flex items-center gap-4 pb-4 border-b border-slate-700/50">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 bg-transparent flex items-center justify-center relative overflow-visible">
+                            <DeadpoolAvatar />
                         </div>
                         <div>
                             <h2 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">About this Tools</h2>
@@ -1556,6 +1556,44 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
             )}
         </div>
     );
+};
+
+const DeadpoolAvatar: React.FC = () => {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_4px_10px_rgba(239,68,68,0.15)] select-none">
+      <defs>
+        <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="60%" stopColor="#dc2626" />
+          <stop offset="100%" stopColor="#991b1b" />
+        </linearGradient>
+        <linearGradient id="patchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e293b" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+        <linearGradient id="shineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M 50,5 C 50,5 51.5,1 55,2 C 55,10 50,14 50,14 Z" fill="#b91c1c" />
+      <ellipse cx="50" cy="52" rx="36" ry="36" fill="url(#headGrad)" />
+      <path d="M 22,40 C 22,25 35,16 50,16 C 58,16 63,18 63,18 C 63,18 51,20 40,30 C 29,40 22,50 22,50 Z" fill="url(#shineGrad)" opacity="0.4" />
+      <path d="M 18,52 C 18,36 34,36 37,45 C 40,54 36,68 25,66 C 18,64 18,58 18,52 Z" fill="url(#patchGrad)" stroke="#0f172a" strokeWidth="1.5" />
+      <path d="M 82,52 C 82,36 66,36 63,45 C 60,54 64,68 75,66 C 82,64 82,58 82,52 Z" fill="url(#patchGrad)" stroke="#0f172a" strokeWidth="1.5" />
+      <path d="M 23,54 C 27,51 31,52 32,53 C 32,53 29,55 25,56 C 23,55 23,54 23,54 Z" fill="#ffffff" />
+      <ellipse cx="72" cy="53" rx="5" ry="6" fill="#ffffff" />
+      <circle cx="73.5" cy="51" r="1.5" fill="#ffffff" opacity="0.8" />
+      <path d="M 50,16 L 50,30" stroke="#7f1d1d" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+      <path d="M 50,70 L 50,88" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+      <path d="M 38,82 C 38,82 42,94 50,94 C 58,94 62,82 62,82 Z" fill="#7f1d1d" />
+      <path d="M 32,84 C 32,84 38,94 50,94 C 62,94 68,84 68,84 C 68,84 72,96 76,98 L 24,98 C 28,96 32,84 32,84 Z" fill="#991b1b" />
+      <path d="M 33,85 C 33,85 41,92 42,96" stroke="#0f172a" strokeWidth="4" strokeLinecap="round" />
+      <path d="M 67,85 C 67,85 59,92 58,96" stroke="#0f172a" strokeWidth="4" strokeLinecap="round" />
+      <rect x="36" y="87" width="4" height="2" rx="0.5" fill="#cbd5e1" transform="rotate(35, 36, 87)" />
+      <rect x="60" y="87" width="4" height="2" rx="0.5" fill="#cbd5e1" transform="rotate(-35, 60, 87)" />
+    </svg>
+  );
 };
 
 export default CycleTime;
