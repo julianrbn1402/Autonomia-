@@ -1525,7 +1525,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                             <p className="text-xs text-slate-400 mt-0.5">Autonomous Learning for Operational Excellence</p>
                         </div>
                     </div>
-                    <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
+                    <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-sans text-justify">
                         <p>
                             Efisiensi operasional alat berat merupakan faktor kritis dalam pencapaian target produksi tambang. Setiap waktu tidak produktif pada loader maupun hauler berdampak langsung pada ritase dan nilai produksi secara keseluruhan. Namun dalam praktik di lapangan, pengukuran dan analisis produktivitas fleet masih sering dilakukan secara manual, membutuhkan waktu lama, dan rentan terhadap kesalahan perhitungan yang dapat memperlambat pengambilan keputusan.
                         </p>
