@@ -609,9 +609,9 @@ export const LaporJalan: React.FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'before' | 'after') => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (limit 2MB for safe localStorage capacity)
-      if (file.size > 2 * 1024 * 1024) {
-        alert('File gambar terlalu besar (Maksimal 2MB)! Mohon kompres atau gunakan gambar lain.');
+      // Check file size (limit 10MB as requested)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File gambar terlalu besar (Maksimal 10MB)! Mohon kompres atau gunakan gambar sewajarnya.');
         return;
       }
       
@@ -975,7 +975,7 @@ export const LaporJalan: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-[10px] font-semibold text-slate-400 block text-center">Pilih / Upload Foto Before</span>
-                      <span className="text-[8px] text-slate-500 block mt-0.5 text-center">Format JPEG/PNG, Maksimal 2MB</span>
+                      <span className="text-[8px] text-slate-500 block mt-0.5 text-center">Format JPEG/PNG, Maksimal 10MB</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -1081,7 +1081,7 @@ export const LaporJalan: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-[10px] font-semibold text-slate-400 block text-center">Pilih / Upload Foto After</span>
-                      <span className="text-[8px] text-slate-500 block mt-0.5 text-center">Format JPEG/PNG, Maksimal 2MB</span>
+                      <span className="text-[8px] text-slate-500 block mt-0.5 text-center">Format JPEG/PNG, Maksimal 10MB</span>
                       <input
                         type="file"
                         accept="image/*"
