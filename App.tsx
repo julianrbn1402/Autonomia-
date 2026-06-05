@@ -3,7 +3,7 @@ import Header from './components/Sidebar';
 import MainContent from './components/MainContent';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about'>('observasi');
+  const [activeTab, setActiveTab] = useState<'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about'>('observasi');
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans flex flex-col">

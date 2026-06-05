@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouteIcon, ChartBarIcon, BookOpenIcon, TimerIcon, HourglassIcon, LightbulbIcon } from './icons';
+import { RouteIcon, ChartBarIcon, BookOpenIcon, TimerIcon, HourglassIcon, LightbulbIcon, ClipboardIcon } from './icons';
 
 const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ size = 36, className }) => (
   <svg
@@ -43,8 +43,8 @@ const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ si
 
 
 interface HeaderProps {
-  activeTab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about';
-  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about') => void;
+  activeTab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about';
+  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => void;
 }
 
 const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -83,26 +83,29 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     { id: 'observasi', label: 'Observasi', icon: RouteIcon, desc: 'Pencatatan & Analisis Cycle Time' },
     { id: 'prestasi', label: 'Prestasi', icon: ChartBarIcon, desc: 'Evaluasi Produktivitas & Target' },
     { id: 'delay', label: 'Delay Cek Bugar', icon: TimerIcon, desc: 'Cek Bugar & Monitoring Idle Unit' },
+    { id: 'lapor_jalan', label: 'Lapor Jalan', icon: ClipboardIcon, desc: 'Form Pelaporan Kondisi & Kerusakan Jalan' },
     { id: 'stopwatch_cs', label: 'Stopwatch CS Loader', icon: HourglassIcon, desc: 'Stopwatch & Unit Loader delay CS' },
     { id: 'referensi', label: 'Referensi', icon: BookOpenIcon, desc: 'Pedoman Formula & Petunjuk' },
     { id: 'about', label: 'About this Tools', icon: LightbulbIcon, desc: 'Latar Belakang & Manfaat Aplikasi' },
   ] as const;
 
-  const getLabel = (id: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about') => {
+  const getLabel = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => {
     if (id === 'about') return 'About this Tools';
     if (id === 'stopwatch_cs') return 'Stopwatch CS Loader';
     if (id === 'delay') return 'Delay Cek Bugar';
+    if (id === 'lapor_jalan') return 'Lapor Jalan';
     if (id === 'observasi') return 'Observasi';
     if (id === 'prestasi') return 'Prestasi';
     return 'Referensi';
   };
 
-  const getIcon = (id: 'observasi' | 'prestasi' | 'delay' | 'referensi' | 'stopwatch_cs' | 'about') => {
+  const getIcon = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => {
     if (id === 'about') return LightbulbIcon;
     if (id === 'stopwatch_cs') return HourglassIcon;
     if (id === 'observasi') return RouteIcon;
     if (id === 'prestasi') return ChartBarIcon;
     if (id === 'delay') return TimerIcon;
+    if (id === 'lapor_jalan') return ClipboardIcon;
     return BookOpenIcon;
   };
 
