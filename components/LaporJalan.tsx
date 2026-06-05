@@ -212,15 +212,21 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
 
   const height = drawY + 24; // bottom padding
 
-  // Prepare Real Canvas
+  // Prepare Real Canvas - UHD High DPI Scaling for maximum legibility on WhatsApp
+  const scale = 3;
   const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Could not get 2D context');
 
+  // Scale drawing operations proportionally
+  ctx.scale(scale, scale);
+
   // Smooth drawing styling
   ctx.textBaseline = 'top';
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // Background Dark Slate Blue Color
   ctx.fillStyle = '#060b17';
