@@ -193,11 +193,11 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
     const afterHasStopwatch = report.afterStopwatch !== undefined;
     
     let leftSubHeight = 12; // before label
-    if (beforeHasStopwatch) leftSubHeight += 22; // badge height
+    if (beforeHasStopwatch) leftSubHeight += 26; // badge height
     leftSubHeight += 160; // image display height
     
     let rightSubHeight = 12; // after label
-    if (afterHasStopwatch) rightSubHeight += 22; // badge height
+    if (afterHasStopwatch) rightSubHeight += 26; // badge height
     rightSubHeight += 160; // image display height
     
     photoSectionHeight += Math.max(leftSubHeight, rightSubHeight) + 16;
@@ -372,21 +372,21 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
       const speedVal = report.beforeSpeed !== undefined ? report.beforeSpeed : (report.panjangSegmen ? parseFloat(calculateSpeed(report.panjangSegmen, report.beforeStopwatch).toFixed(1)) : 0);
       const speedText = `🚗 ${speedVal.toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j`;
 
-      ctx.font = 'bold 8.5px SFMono-Regular, Consolas, monospace';
-      const timerWidth = ctx.measureText(timerText).width + 10;
+      ctx.font = 'bold 10px SFMono-Regular, Consolas, monospace';
+      const timerWidth = ctx.measureText(timerText).width + 12;
 
       ctx.fillStyle = 'rgba(244, 63, 94, 0.08)';
-      drawRoundRect(ctx, 24, leftY, timerWidth, 18, 4);
+      drawRoundRect(ctx, 24, leftY, timerWidth, 22, 5);
       ctx.fill();
       ctx.strokeStyle = 'rgba(244, 63, 94, 0.2)';
       ctx.stroke();
 
       ctx.fillStyle = '#f43f5e';
-      ctx.fillText(timerText, 29, leftY + 4);
+      ctx.fillText(timerText, 29, leftY + 5.5);
 
       ctx.fillStyle = '#cbd5e1';
-      ctx.fillText(speedText, 24 + timerWidth + 8, leftY + 4);
-      leftY += 22;
+      ctx.fillText(speedText, 24 + timerWidth + 10, leftY + 5.5);
+      leftY += 26;
     }
 
     if (report.fotoBefore) {
@@ -428,21 +428,21 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
       const speedVal = report.afterSpeed !== undefined ? report.afterSpeed : (report.panjangSegmen ? parseFloat(calculateSpeed(report.panjangSegmen, report.afterStopwatch).toFixed(1)) : 0);
       const speedText = `🚗 ${speedVal.toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j`;
 
-      ctx.font = 'bold 8.5px SFMono-Regular, Consolas, monospace';
-      const timerWidth = ctx.measureText(timerText).width + 10;
+      ctx.font = 'bold 10px SFMono-Regular, Consolas, monospace';
+      const timerWidth = ctx.measureText(timerText).width + 12;
 
       ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
-      drawRoundRect(ctx, 262, rightY, timerWidth, 18, 4);
+      drawRoundRect(ctx, 262, rightY, timerWidth, 22, 5);
       ctx.fill();
       ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)';
       ctx.stroke();
 
       ctx.fillStyle = '#10b981';
-      ctx.fillText(timerText, 267, rightY + 4);
+      ctx.fillText(timerText, 267, rightY + 5.5);
 
       ctx.fillStyle = '#cbd5e1';
-      ctx.fillText(speedText, 262 + timerWidth + 8, rightY + 4);
-      rightY += 22;
+      ctx.fillText(speedText, 262 + timerWidth + 10, rightY + 5.5);
+      rightY += 26;
     }
 
     if (report.fotoAfter) {
