@@ -195,7 +195,20 @@ export const QnaBot: React.FC = () => {
         body: JSON.stringify({ messages: historyToSend })
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let data: any;
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        // If it's HTML, clean up the text representation or show res.statusText
+        const isHtml = text.trim().startsWith('<');
+        const cleanMessage = isHtml 
+          ? `Server returned an HTML page (Status ${res.status}). It might be starting up or has thrown an error.`
+          : text.substring(0, 200);
+        throw new Error(cleanMessage || `Server returned status ${res.status}`);
+      }
 
       if (!res.ok) {
         throw new Error(data.error || 'Terjadi kesalahan sistem.');
