@@ -86,8 +86,8 @@ interface Spark {
 
 
 interface HeaderProps {
-  activeTab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about';
-  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => void;
+  activeTab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about';
+  setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about') => void;
 }
 
 const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -102,6 +102,21 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
     strokeLinejoin="round"
   >
     <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const MessageIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 
@@ -159,26 +174,29 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     { id: 'lapor_jalan', label: 'Lapor Jalan', icon: ClipboardIcon, desc: 'Form Pelaporan Kondisi & Kerusakan Jalan' },
     { id: 'stopwatch_cs', label: 'Stopwatch CS Loader', icon: HourglassIcon, desc: 'Stopwatch & Unit Loader delay CS' },
     { id: 'referensi', label: 'Referensi', icon: BookOpenIcon, desc: 'Pedoman Formula & Petunjuk' },
+    { id: 'qna', label: 'Autonomia AI', icon: MessageIcon, desc: 'Your Personal Assistant' },
     { id: 'about', label: 'About this Tools', icon: LightbulbIcon, desc: 'Latar Belakang & Manfaat Aplikasi' },
   ] as const;
 
-  const getLabel = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => {
+  const getLabel = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about') => {
     if (id === 'about') return 'About this Tools';
     if (id === 'stopwatch_cs') return 'Stopwatch CS Loader';
     if (id === 'delay') return 'Delay Cek Bugar';
     if (id === 'lapor_jalan') return 'Lapor Jalan';
     if (id === 'observasi') return 'Observasi';
     if (id === 'prestasi') return 'Prestasi';
+    if (id === 'qna') return 'Autonomia AI';
     return 'Referensi';
   };
 
-  const getIcon = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => {
+  const getIcon = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about') => {
     if (id === 'about') return LightbulbIcon;
     if (id === 'stopwatch_cs') return HourglassIcon;
     if (id === 'observasi') return RouteIcon;
     if (id === 'prestasi') return ChartBarIcon;
     if (id === 'delay') return TimerIcon;
     if (id === 'lapor_jalan') return ClipboardIcon;
+    if (id === 'qna') return MessageIcon;
     return BookOpenIcon;
   };
 

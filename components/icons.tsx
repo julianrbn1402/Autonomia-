@@ -136,3 +136,10 @@ export const WhatsappIcon: React.FC<IconProps> = ({ className }) => (
         <path d="M12.3 8.3a.5.5 0 0 0-.7 0L10.3 9.6c-.3.3-.3.9 0 1.2.7.7 1.5 1.5 2.2 2.2.3.3.9.3 1.2 0l1.3-1.3a.5.5 0 0 0 0-.7l-1.3-1.3a.5.5 0 0 0-.7 0l-.4.4-.3-.4-1-.1c-.4-.1-.7.2-.7.6s.3.7.7.7h1" strokeDasharray="1 1" />
     </svg>
 );
+
+export const SendIcon: React.FC<IconProps> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+);
