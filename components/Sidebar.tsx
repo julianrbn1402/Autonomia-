@@ -157,14 +157,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     { id: 'prestasi', label: 'Prestasi', icon: ChartBarIcon, desc: 'Evaluasi Produktivitas & Target' },
     { id: 'delay', label: 'Delay Cek Bugar', icon: TimerIcon, desc: 'Cek Bugar & Monitoring Idle Unit' },
     { id: 'lapor_jalan', label: 'Lapor Jalan', icon: ClipboardIcon, desc: 'Form Pelaporan Kondisi & Kerusakan Jalan' },
-    { id: 'stopwatch_cs', label: 'Stopwatch CS Loader', icon: HourglassIcon, desc: 'Stopwatch & Unit Loader delay CS' },
+    { id: 'stopwatch_cs', label: 'S-Two', icon: HourglassIcon, desc: 'Monitoring Start Stop Aktivitas Changeshift' },
     { id: 'referensi', label: 'Referensi', icon: BookOpenIcon, desc: 'Pedoman Formula & Petunjuk' },
     { id: 'about', label: 'About this Tools', icon: LightbulbIcon, desc: 'Latar Belakang & Manfaat Aplikasi' },
   ] as const;
 
   const getLabel = (id: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => {
     if (id === 'about') return 'About this Tools';
-    if (id === 'stopwatch_cs') return 'Stopwatch CS Loader';
+    if (id === 'stopwatch_cs') return 'S-Two';
     if (id === 'delay') return 'Delay Cek Bugar';
     if (id === 'lapor_jalan') return 'Lapor Jalan';
     if (id === 'observasi') return 'Observasi';
