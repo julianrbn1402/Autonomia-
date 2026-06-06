@@ -187,37 +187,101 @@ export const QnaBot: React.FC = () => {
         content: msg.content
       }));
 
-      const res = await fetch('/api/qna', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ messages: historyToSend })
-      });
+      // Try checking if there is a client-side API Key configured (either injected by Vite or from standard env vars)
+      const clientApiKey = (
+        (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) ||
+        (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
+        (typeof process !== 'undefined' && process.env?.API_KEY) ||
+        ''
+      );
 
-      const contentType = res.headers.get('content-type') || '';
-      let data: any;
+      let replyText = '';
+      let useClientFallback = false;
 
-      if (contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        // If it's HTML, clean up the text representation or show res.statusText
-        const isHtml = text.trim().startsWith('<');
-        const cleanMessage = isHtml 
-          ? `Server returned an HTML page (Status ${res.status}). It might be starting up or has thrown an error.`
-          : text.substring(0, 200);
-        throw new Error(cleanMessage || `Server returned status ${res.status}`);
+      try {
+        const res = await fetch('/api/qna', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ messages: historyToSend })
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+
+        if (res.status === 404 || contentType.includes('text/html')) {
+          if (clientApiKey) {
+            useClientFallback = true;
+          } else {
+            throw new Error(`Endpoint /api/qna tidak ditemukan (Status ${res.status}). Terjadi karena deploying statis di Vercel. Silakan tambahkan GEMINI_API_KEY atau VITE_GEMINI_API_KEY ke Environment Variables Vercel Anda.`);
+          }
+        } else {
+          let data: any;
+          if (contentType.includes('application/json')) {
+            data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Terjadi kesalahan sistem.');
+            }
+            replyText = data.reply;
+          } else {
+            const text = await res.text();
+            const isHtml = text.trim().startsWith('<');
+            const cleanMessage = isHtml 
+              ? `Server returned HTML (Status ${res.status}).`
+              : text.substring(0, 200);
+            
+            if (clientApiKey) {
+              useClientFallback = true;
+            } else {
+              throw new Error(cleanMessage || `Server returned status ${res.status}`);
+            }
+          }
+        }
+      } catch (serverErr: any) {
+        console.warn('Backend endpoint /api/qna failed, trying client-side fallback:', serverErr);
+        if (clientApiKey) {
+          useClientFallback = true;
+        } else {
+          throw serverErr;
+        }
       }
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Terjadi kesalahan sistem.');
+      // Client-side fallback to direct Gemini REST API
+      if (useClientFallback) {
+        // Prepare contents for Gemini API (schema matches exactly what we have)
+        const geminiContents = historyToSend.map(msg => ({
+          role: msg.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: msg.content }]
+        }));
+
+        // Fetching 2.5-flash or 1.5-flash
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${clientApiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: geminiContents,
+            systemInstruction: {
+              parts: [{ text: 'Kamu adalah AUTONOMIA AI, asisten pribadi Rangers (operasional tambang). Kamu membantu mereka menganalisis Match Factor loader, target cycle time, delay times, pelaporan jalan tambang, dan Cek Bugar changeshift. Berikan jawaban yang ramah, sopan, bersahaja, lugas, dan sangat membantu dalam Bahasa Indonesia.' }]
+            }
+          })
+        });
+
+        if (!geminiRes.ok) {
+          const errData = await geminiRes.json().catch(() => ({}));
+          const errMsg = errData?.error?.message || `Gemini API returned status ${geminiRes.status}`;
+          throw new Error(errMsg);
+        }
+
+        const geminiData = await geminiRes.json();
+        replyText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, tidak menerima respons dari asisten virtual.';
       }
 
       const botMessage: Message = {
         id: Math.random().toString(),
         role: 'assistant',
-        content: data.reply,
+        content: replyText,
         timestamp: new Date()
       };
 
@@ -235,7 +299,7 @@ export const QnaBot: React.FC = () => {
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Halo kembali! Saya **AUTONOMIA AI** siap membantu Anda menganalisis operasional fleet pertambangan Anda. Ada kendala produktivitas di lapangan hari ini?',
+        content: 'Halo Rangers! Saya **AUTONOMIA AI**, asisten pribadi Anda. Tanyakan sesuatu kepada saya..',
         timestamp: new Date()
       }
     ]);
