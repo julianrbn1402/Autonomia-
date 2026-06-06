@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { StopwatchCSLoader } from './StopwatchCSLoader';
 import { HaulerSimulation } from './HaulerSimulation';
 import { LaporJalan } from './LaporJalan';
-import { QnaBot } from './QnaBot';
 import { ClockIcon, HourglassIcon, ChartBarIcon, GearIcon, RouteIcon, MiningTruckIcon, LightbulbIcon, CheckCircleIcon, XCircleIcon, BookOpenIcon, TimerIcon, TrashIcon, PlusIcon, PlayIcon, StopIcon, RotateCcwIcon, WhatsappIcon } from './icons';
 
 type Status = 'good' | 'bad' | 'neutral';
@@ -293,8 +292,8 @@ const ProductivityTable: React.FC = () => (
 
 
 interface CycleTimeProps {
-    activeTab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about';
-    setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'qna' | 'stopwatch_cs' | 'about') => void;
+    activeTab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about';
+    setActiveTab: (tab: 'observasi' | 'prestasi' | 'delay' | 'lapor_jalan' | 'referensi' | 'stopwatch_cs' | 'about') => void;
 }
 
 const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
@@ -1518,10 +1517,6 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
 
             {activeTab === 'lapor_jalan' && (
                 <LaporJalan />
-            )}
-
-            {activeTab === 'qna' && (
-                <QnaBot />
             )}
 
             {activeTab === 'about' && (
