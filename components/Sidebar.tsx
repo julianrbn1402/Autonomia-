@@ -10,7 +10,40 @@ const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ si
     className={`text-amber-500 ${className || ''}`}
     aria-hidden="true"
   >
-    <g className="brain-ray-group">
+    <style>{`
+      @keyframes ray-rotate {
+        0% { transform: rotate(0deg); }
+        105% { transform: rotate(360deg); }
+      }
+      @keyframes wing-breathe-left {
+        0%, 100% { transform: translate(0px, 0px) scale(0.98); }
+        55% { transform: translate(-1.5px, 0px) scale(1.02); }
+      }
+      @keyframes wing-breathe-right {
+        0%, 100% { transform: translate(0px, 0px) scale(0.98); }
+        55% { transform: translate(1.5px, 0px) scale(1.02); }
+      }
+      @keyframes central-glow {
+        0%, 100% { filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); }
+        50% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85)); }
+      }
+      .animate-rays {
+        transform-origin: 32px 32px;
+        animation: ray-rotate 28s linear infinite;
+      }
+      .animate-wing-left {
+        transform-origin: 23px 34px;
+        animation: wing-breathe-left 2.5s ease-in-out infinite;
+      }
+      .animate-wing-right {
+        transform-origin: 41px 34px;
+        animation: wing-breathe-right 2.5s ease-in-out infinite;
+      }
+      .animate-central-brain {
+        animation: central-glow 3s ease-in-out infinite;
+      }
+    `}</style>
+    <g className="brain-ray-group animate-rays">
       <path d="M32 0 L 30 10 L 34 10 Z" fill="currentColor" opacity="0.8"/>
       <path d="M54.3 9.7 L 49.5 14.5 L 51.5 16.5 Z" fill="currentColor" opacity="0.8"/>
       <path d="M64 32 L 54 30 L 54 34 Z" fill="currentColor" opacity="0.8"/>
@@ -21,14 +54,14 @@ const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ si
       <path d="M9.7 9.7 L 14.5 14.5 L 12.5 16.5 Z" fill="currentColor" opacity="0.8"/>
     </g>
     
-    <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-central-brain">
         {/* Left Wing */}
-        <g className="brain-wing-left">
+        <g className="brain-wing-left animate-wing-left">
             <path d="M23 26 C 12 28, 12 40, 23 42 L 18 34 Z" fill="currentColor" />
         </g>
         
         {/* Right Wing */}
-        <g className="brain-wing-right">
+        <g className="brain-wing-right animate-wing-right">
              <path d="M41 26 C 52 28, 52 40, 41 42 L 46 34 Z" fill="currentColor" />
         </g>
         
@@ -40,6 +73,16 @@ const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ si
     </g>
   </svg>
 );
+
+interface Spark {
+  id: number;
+  x: number;
+  y: number;
+  tx: number;
+  ty: number;
+  rot: number;
+  size: number;
+}
 
 
 interface HeaderProps {
@@ -64,7 +107,37 @@ const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
 
 const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [sparks, setSparks] = React.useState<Spark[]>([]);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const handleTriggerSparks = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const isClick = e.type === 'click' || e.type === 'mousedown';
+    const count = isClick ? 14 : 4; // click gets 14 sparks, hover gets 4 sparks
+
+    const newSparks = Array.from({ length: count }).map((_, i) => {
+      const angle = (i * (360 / count) + Math.random() * 25) * (Math.PI / 180);
+      const intensity = isClick ? 80 : 40;
+      const distance = 20 + Math.random() * intensity;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+
+      return {
+        id: Math.random() + Date.now() + i,
+        x,
+        y,
+        tx,
+        ty,
+        rot: Math.random() * 360,
+        size: isClick ? (3 + Math.random() * 6) : (2 + Math.random() * 3),
+      };
+    });
+
+    setSparks((prev) => [...prev, ...newSparks].slice(-60));
+  };
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -129,10 +202,28 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
           }
+          @keyframes gold-metallic-shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+          }
           .animate-autonomia {
             background-size: 200% auto;
             animation: gradient-shift 4s ease infinite, subtle-bounce 3s ease-in-out infinite;
             display: inline-block;
+          }
+          .animate-gold-shimmer {
+            background: linear-gradient(
+              120deg,
+              #fdba74 0%,
+              #fbbf24 25%,
+              #fffbeb 50%,
+              #fbbf24 75%,
+              #fdba74 100%
+            );
+            background-size: 200% auto;
+            animation: gold-metallic-shimmer 3s linear infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
           }
           .animate-marquee-container {
             width: 220px;
@@ -154,17 +245,54 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
           .animate-marquee-container:hover .animate-marquee-text {
             animation-play-state: paused;
           }
+          @keyframes spark-float {
+            0% {
+              transform: translate(0, 0) scale(1) rotate(0deg);
+              opacity: 1;
+            }
+            100% {
+              transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
+              opacity: 0;
+            }
+          }
+          .animate-spark {
+            animation: spark-float 1.0s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+          }
         `}</style>
         <div className="mx-auto px-4 py-2 sm:px-6 max-w-5xl">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             
             {/* Logo Brand: Centered brand text framed by logo iconography on both sides symmetrically */}
-            <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
-              <AnimatedBrainIcon size={38} className="shrink-0" />
+            <div 
+              onMouseDown={handleTriggerSparks}
+              onMouseEnter={handleTriggerSparks}
+              className="flex items-center justify-center gap-3 w-full sm:w-auto relative overflow-visible cursor-pointer select-none group"
+            >
+              {/* Sparks render area */}
+              {sparks.map((spark) => (
+                <span
+                  key={spark.id}
+                  className="absolute pointer-events-none rounded-full bg-gradient-to-r from-amber-400 to-amber-300 animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                  style={{
+                    left: spark.x,
+                    top: spark.y,
+                    width: spark.size,
+                    height: spark.size,
+                    '--tx': `${spark.tx}px`,
+                    '--ty': `${spark.ty}px`,
+                    '--rot': `${spark.rot}deg`,
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 50,
+                  } as React.CSSProperties}
+                />
+              ))}
+
+              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
               
               <div className="text-center flex flex-col items-center">
                 <div className="flex items-center justify-center gap-1.5">
-                  <h1 className="text-lg sm:text-xl font-extrabold text-slate-100 tracking-[0.22em] font-mono bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-none animate-autonomia">
+                  <h1 className="text-lg sm:text-xl font-black tracking-[0.22em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-102">
                     AUTONOMIA!
                   </h1>
                   <span className="hidden sm:inline-block px-1.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 leading-none">
@@ -178,7 +306,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
                 </div>
               </div>
 
-              <AnimatedBrainIcon size={38} className="shrink-0" />
+              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
             </div>
 
             {/* Centered/Right-aligned Dropdown Menu Selector (Scroll Down Style) */}
@@ -276,19 +404,44 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-72 bg-slate-950/70 border-r border-slate-800/60 z-30 backdrop-blur-md p-6 justify-between select-none font-sans overflow-y-auto">
         <div className="space-y-6">
           {/* Symmetrical Logo Frame */}
-          <div className="flex flex-col items-center gap-3 border-b border-slate-800/50 pb-5">
+          <div 
+            onMouseDown={handleTriggerSparks}
+            onMouseEnter={handleTriggerSparks}
+            className="flex flex-col items-center gap-3 border-b border-slate-800/50 pb-5 relative overflow-visible cursor-pointer select-none group"
+          >
+            {/* Sparks render area */}
+            {sparks.map((spark) => (
+              <span
+                key={spark.id}
+                className="absolute pointer-events-none rounded-full bg-gradient-to-r from-amber-400 to-amber-300 animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                style={{
+                  left: spark.x,
+                  top: spark.y,
+                  width: spark.size,
+                  height: spark.size,
+                  '--tx': `${spark.tx}px`,
+                  '--ty': `${spark.ty}px`,
+                  '--rot': `${spark.rot}deg`,
+                  position: 'absolute',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 50,
+                } as React.CSSProperties}
+              />
+            ))}
+
             <div className="flex items-center justify-center gap-3">
-              <AnimatedBrainIcon size={34} className="shrink-0 animate-pulse" />
-              <h1 className="text-xl font-extrabold text-slate-100 tracking-[0.22em] font-mono bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-none">
+              <AnimatedBrainIcon size={34} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
+              <h1 className="text-xl font-black tracking-[0.22em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-105">
                 AUTONOMIA!
               </h1>
             </div>
             
-            <span className="px-2 py-0.5 text-[8.5px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 leading-none">
+            <span className="px-2 py-0.5 text-[8.5px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 leading-none flex items-center gap-1.5 transition-colors group-hover:border-amber-400/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               OPERATIONS ROOM PRO
             </span>
             
-            <p className="text-[10px] italic text-slate-400 text-center font-sans tracking-wide leading-relaxed max-w-[210px]">
+            <p className="text-[10px] italic text-slate-400 text-center font-sans tracking-wide leading-relaxed max-w-[210px] transition-colors group-hover:text-slate-300">
               Autonomous Learning for Operational Excellence
             </p>
           </div>
