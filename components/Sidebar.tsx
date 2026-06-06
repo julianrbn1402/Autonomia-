@@ -112,163 +112,251 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
   const ActiveIcon = getIcon(activeTab);
 
   return (
-    <header className="bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-md shadow-lg shadow-slate-950/10">
-      <style>{`
-        @keyframes gradient-shift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes subtle-bounce {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-1.5px) scale(1.02); }
-        }
-        @keyframes marquee-horizontal {
-          0% { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-autonomia {
-          background-size: 200% auto;
-          animation: gradient-shift 4s ease infinite, subtle-bounce 3s ease-in-out infinite;
-          display: inline-block;
-        }
-        .animate-marquee-container {
-          width: 220px;
-          overflow: hidden;
-          position: relative;
-          mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
-          -webkit-mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
-        }
-        @media (min-width: 640px) {
-          .animate-marquee-container {
-            width: 260px;
+    <>
+      {/* Mobile Top Header (100% Unchanged on Mobile for safety) */}
+      <header className="lg:hidden bg-slate-900/95 border-b border-slate-800/80 sticky top-0 z-30 backdrop-blur-md shadow-lg shadow-slate-950/10">
+        <style>{`
+          @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
           }
-        }
-        .animate-marquee-text {
-          display: inline-block;
-          white-space: nowrap;
-          animation: marquee-horizontal 12s linear infinite;
-        }
-        .animate-marquee-container:hover .animate-marquee-text {
-          animation-play-state: paused;
-        }
-      `}</style>
-      <div className="mx-auto px-4 py-2 sm:px-6 max-w-5xl">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          
-          {/* Logo Brand: Centered brand text framed by logo iconography on both sides symmetrically */}
-          <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
-            <AnimatedBrainIcon size={38} className="shrink-0" />
+          @keyframes subtle-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-1.5px) scale(1.02); }
+          }
+          @keyframes marquee-horizontal {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+          .animate-autonomia {
+            background-size: 200% auto;
+            animation: gradient-shift 4s ease infinite, subtle-bounce 3s ease-in-out infinite;
+            display: inline-block;
+          }
+          .animate-marquee-container {
+            width: 220px;
+            overflow: hidden;
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
+          }
+          @media (min-width: 640px) {
+            .animate-marquee-container {
+              width: 260px;
+            }
+          }
+          .animate-marquee-text {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee-horizontal 12s linear infinite;
+          }
+          .animate-marquee-container:hover .animate-marquee-text {
+            animation-play-state: paused;
+          }
+        `}</style>
+        <div className="mx-auto px-4 py-2 sm:px-6 max-w-5xl">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             
-            <div className="text-center flex flex-col items-center">
-              <div className="flex items-center justify-center gap-1.5">
-                <h1 className="text-lg sm:text-xl font-extrabold text-slate-100 tracking-[0.22em] font-mono bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-none animate-autonomia">
-                  AUTONOMIA!
-                </h1>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 leading-none">
-                  PRO
-                </span>
-              </div>
-              <div className="animate-marquee-container mt-1">
-                <span className="animate-marquee-text text-[10px] italic text-slate-400 font-sans tracking-wide leading-none">
-                  Autonomous Learning for Operational Excellence
-                </span>
-              </div>
-            </div>
-
-            <AnimatedBrainIcon size={38} className="shrink-0" />
-          </div>
-
-          {/* Centered/Right-aligned Dropdown Menu Selector (Scroll Down Style) */}
-          <div ref={dropdownRef} className="relative w-full sm:w-[260px] z-40">
-            
-            {/* The Select/Trigger Button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`w-full flex items-center justify-between px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-950/80 border rounded-lg shadow-md transition-all duration-300 select-none cursor-pointer group ${
-                isOpen 
-                  ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-amber-500/5' 
-                  : 'border-slate-800 hover:border-slate-700 hover:bg-slate-950'
-              }`}
-              id="menu-trigger-button"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`p-1 rounded transition-colors duration-200 ${isOpen ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-amber-500'}`}>
-                  <ActiveIcon className="h-3.5 w-3.5 shrink-0" />
+            {/* Logo Brand: Centered brand text framed by logo iconography on both sides symmetrically */}
+            <div className="flex items-center justify-center gap-3 w-full sm:w-auto">
+              <AnimatedBrainIcon size={38} className="shrink-0" />
+              
+              <div className="text-center flex flex-col items-center">
+                <div className="flex items-center justify-center gap-1.5">
+                  <h1 className="text-lg sm:text-xl font-extrabold text-slate-100 tracking-[0.22em] font-mono bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-none animate-autonomia">
+                    AUTONOMIA!
+                  </h1>
+                  <span className="hidden sm:inline-block px-1.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 leading-none">
+                    PRO
+                  </span>
                 </div>
-                <div className="text-left font-sans">
-                  <span className="block text-[7px] uppercase tracking-wider font-bold text-slate-500 leading-none" style={{ fontSize: '7px' }}>Menu Navigasi</span>
-                  <span className="block text-xs font-bold text-slate-200 tracking-wide group-hover:text-amber-400 transition-colors mt-0.5 leading-none">
-                    {getLabel(activeTab)}
+                <div className="animate-marquee-container mt-1">
+                  <span className="animate-marquee-text text-[10px] italic text-slate-400 font-sans tracking-wide leading-none">
+                    Autonomous Learning for Operational Excellence
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[8px] text-slate-400 bg-slate-900 border border-slate-800 px-1 py-0.5 rounded font-mono font-medium hidden sm:inline leading-none">
-                  MENU
-                </span>
-                <ChevronDownIcon 
-                  className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-300 ease-out ${
-                    isOpen ? 'rotate-180 text-amber-500' : 'group-hover:text-slate-300'
-                  }`} 
-                />
-              </div>
-            </button>
 
-            {/* Dropdown Menu List: "Scroll Down" Animated Panel */}
-            <div 
-              className={`absolute top-full left-0 right-0 mt-1.5 bg-slate-950/95 border border-slate-850 rounded-lg shadow-2xl z-50 backdrop-blur-md overflow-hidden transition-all duration-300 ease-out origin-top ${
-                isOpen 
-                  ? 'opacity-100 scale-y-100 max-h-[350px] visible' 
-                  : 'opacity-0 scale-y-95 max-h-0 invisible'
-              }`}
-              style={{ transitionProperty: 'opacity, transform, max-height, visibility' }}
-              id="menu-dropdown-list"
-            >
-              <div className="p-1 space-y-0.5 font-sans">
-                {menuItems.map((item) => {
-                  const ItemIcon = item.icon;
-                  const itemTabId = item.id;
-                  const isSelected = itemTabId === activeTab;
-                  const labelStr = itemTabId === 'delay' ? 'Delay Cek Bugar' : item.label;
-                  return (
-                    <button
-                      key={itemTabId}
-                      onClick={() => {
-                        setActiveTab(itemTabId);
-                        setIsOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition-all duration-150 cursor-pointer ${
-                        isSelected
-                          ? 'bg-amber-500 text-slate-950 font-bold'
-                          : 'text-slate-300 hover:bg-slate-900/80 hover:text-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-slate-950 text-amber-500' : 'bg-slate-900 text-slate-400'}`}>
-                          <ItemIcon className="h-3.5 w-3.5 shrink-0" />
+              <AnimatedBrainIcon size={38} className="shrink-0" />
+            </div>
+
+            {/* Centered/Right-aligned Dropdown Menu Selector (Scroll Down Style) */}
+            <div ref={dropdownRef} className="relative w-full sm:w-[260px] z-40">
+              
+              {/* The Select/Trigger Button */}
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`w-full flex items-center justify-between px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-950/80 border rounded-lg shadow-md transition-all duration-300 select-none cursor-pointer group ${
+                  isOpen 
+                    ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-amber-500/5' 
+                    : 'border-slate-800 hover:border-slate-700 hover:bg-slate-950'
+                }`}
+                id="menu-trigger-button"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-1 rounded transition-colors duration-200 ${isOpen ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-amber-500'}`}>
+                    <ActiveIcon className="h-3.5 w-3.5 shrink-0" />
+                  </div>
+                  <div className="text-left font-sans">
+                    <span className="block text-[7px] uppercase tracking-wider font-bold text-slate-500 leading-none" style={{ fontSize: '7px' }}>Menu Navigasi</span>
+                    <span className="block text-xs font-bold text-slate-200 tracking-wide group-hover:text-amber-400 transition-colors mt-0.5 leading-none">
+                      {getLabel(activeTab)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[8px] text-slate-400 bg-slate-900 border border-slate-800 px-1 py-0.5 rounded font-mono font-medium hidden sm:inline leading-none">
+                    MENU
+                  </span>
+                  <ChevronDownIcon 
+                    className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-300 ease-out ${
+                      isOpen ? 'rotate-180 text-amber-500' : 'group-hover:text-slate-300'
+                    }`} 
+                  />
+                </div>
+              </button>
+
+              {/* Dropdown Menu List: "Scroll Down" Animated Panel */}
+              <div 
+                className={`absolute top-full left-0 right-0 mt-1.5 bg-slate-950/95 border border-slate-850 rounded-lg shadow-2xl z-50 backdrop-blur-md overflow-hidden transition-all duration-300 ease-out origin-top ${
+                  isOpen 
+                    ? 'opacity-100 scale-y-100 max-h-[350px] visible' 
+                    : 'opacity-0 scale-y-95 max-h-0 invisible'
+                }`}
+                style={{ transitionProperty: 'opacity, transform, max-height, visibility' }}
+                id="menu-dropdown-list"
+              >
+                <div className="p-1 space-y-0.5 font-sans">
+                  {menuItems.map((item) => {
+                    const ItemIcon = item.icon;
+                    const itemTabId = item.id;
+                    const isSelected = itemTabId === activeTab;
+                    const labelStr = itemTabId === 'delay' ? 'Delay Cek Bugar' : item.label;
+                    return (
+                      <button
+                        key={itemTabId}
+                        onClick={() => {
+                          setActiveTab(itemTabId);
+                          setIsOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition-all duration-150 cursor-pointer ${
+                          isSelected
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'text-slate-300 hover:bg-slate-900/80 hover:text-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-slate-950 text-amber-500' : 'bg-slate-900 text-slate-400'}`}>
+                            <ItemIcon className="h-3.5 w-3.5 shrink-0" />
+                          </div>
+                          <div>
+                            <span className="block text-xs font-bold leading-none">{labelStr}</span>
+                            <span className={`block text-[9px] mt-0.5 font-normal leading-tight ${isSelected ? 'text-slate-900/80' : 'text-slate-500'}`}>
+                              {item.desc}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="block text-xs font-bold leading-none">{labelStr}</span>
-                          <span className={`block text-[9px] mt-0.5 font-normal leading-tight ${isSelected ? 'text-slate-900/80' : 'text-slate-500'}`}>
-                            {item.desc}
-                          </span>
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <span className="h-1 w-1 rounded-full bg-slate-950 animate-pulse mr-1" />
-                      )}
-                    </button>
-                  );
-                })}
+                        {isSelected && (
+                          <span className="h-1 w-1 rounded-full bg-slate-950 animate-pulse mr-1" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+
             </div>
 
           </div>
-
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* PC Left Navigation Sidebar (Extremely polished, executive design for desktop viewports) */}
+      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-72 bg-slate-950/70 border-r border-slate-800/60 z-30 backdrop-blur-md p-6 justify-between select-none font-sans overflow-y-auto">
+        <div className="space-y-6">
+          {/* Symmetrical Logo Frame */}
+          <div className="flex flex-col items-center gap-3 border-b border-slate-800/50 pb-5">
+            <div className="flex items-center justify-center gap-3">
+              <AnimatedBrainIcon size={34} className="shrink-0 animate-pulse" />
+              <h1 className="text-xl font-extrabold text-slate-100 tracking-[0.22em] font-mono bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-none">
+                AUTONOMIA!
+              </h1>
+            </div>
+            
+            <span className="px-2 py-0.5 text-[8.5px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 leading-none">
+              OPERATIONS ROOM PRO
+            </span>
+            
+            <p className="text-[10px] italic text-slate-400 text-center font-sans tracking-wide leading-relaxed max-w-[210px]">
+              Autonomous Learning for Operational Excellence
+            </p>
+          </div>
+
+          {/* Navigation Items list */}
+          <div className="space-y-2">
+            <span className="text-[8.5px] font-mono tracking-widest uppercase font-black text-slate-500 block mb-2 px-1">
+              Main Control Menu
+            </span>
+            
+            {menuItems.map((item) => {
+              const ItemIcon = item.icon;
+              const isSelected = item.id === activeTab;
+              const labelStr = item.id === 'delay' ? 'Delay Cek Bugar' : item.label;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-3.5 p-3 rounded-xl text-left transition-all duration-200 group relative border cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 font-bold shadow-md shadow-amber-500/5'
+                      : 'text-slate-400 border-transparent hover:text-slate-100 hover:bg-slate-900/40 hover:border-slate-800/60'
+                  }`}
+                >
+                  {/* Selected Indicator Light Bar */}
+                  {isSelected && (
+                    <span className="absolute left-0 top-3 bottom-3 w-1 bg-amber-500 rounded-r-md animate-fade-in" />
+                  )}
+                  
+                  <div className={`p-2 rounded-lg transition-all duration-150 ${
+                    isSelected 
+                      ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25' 
+                      : 'bg-slate-900/80 text-slate-400 group-hover:text-amber-500'
+                  }`}>
+                    <ItemIcon className="h-4 w-4 shrink-0" />
+                  </div>
+                  
+                  <div className="flex-grow min-w-0">
+                    <span className="block text-xs font-bold leading-none truncate">{labelStr}</span>
+                    <span className={`block text-[9px] font-normal leading-tight mt-1 truncate transition-colors ${
+                      isSelected ? 'text-slate-300' : 'text-slate-500'
+                    }`}>
+                      {item.desc}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footer info in PC Sidebar */}
+        <div className="border-t border-slate-800/60 pt-4 mt-6 space-y-2">
+          <div className="bg-slate-900/30 rounded-lg p-2.5 border border-slate-900 text-center">
+            <span className="text-[7.5px] font-mono tracking-wide text-slate-500 block uppercase font-bold text-center">
+              Current Session Active
+            </span>
+            <span className="text-[9.5px] font-semibold text-slate-300 font-mono block mt-1 text-center">
+              Sat, June 6, 2026 UTC
+            </span>
+          </div>
+          <p className="text-[9px] text-slate-600 text-center font-mono leading-none">
+            &copy; 2025 by Julian Robin
+          </p>
+        </div>
+      </aside>
+    </>
   );
 };
 

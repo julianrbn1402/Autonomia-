@@ -18,6 +18,7 @@ interface RoadReport {
   afterStopwatch?: number; // seconds
   beforeSpeed?: number;     // km/h
   afterSpeed?: number;      // km/h
+  createdAt?: number;       // ms epoch timestamp
 }
 
 const DAMAGE_TYPES = [
@@ -372,21 +373,21 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
       const speedVal = report.beforeSpeed !== undefined ? report.beforeSpeed : (report.panjangSegmen ? parseFloat(calculateSpeed(report.panjangSegmen, report.beforeStopwatch).toFixed(1)) : 0);
       const speedText = `🚗 ${speedVal.toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j`;
 
-      ctx.font = 'bold 10px SFMono-Regular, Consolas, monospace';
+      ctx.font = 'bold 12.5px SFMono-Regular, Consolas, monospace';
       const timerWidth = ctx.measureText(timerText).width + 12;
 
       ctx.fillStyle = 'rgba(244, 63, 94, 0.08)';
-      drawRoundRect(ctx, 24, leftY, timerWidth, 22, 5);
+      drawRoundRect(ctx, 24, leftY, timerWidth, 24, 5);
       ctx.fill();
       ctx.strokeStyle = 'rgba(244, 63, 94, 0.2)';
       ctx.stroke();
 
       ctx.fillStyle = '#f43f5e';
-      ctx.fillText(timerText, 29, leftY + 5.5);
+      ctx.fillText(timerText, 29, leftY + 6);
 
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillText(speedText, 24 + timerWidth + 10, leftY + 5.5);
-      leftY += 26;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(speedText, 24 + timerWidth + 10, leftY + 6);
+      leftY += 28;
     }
 
     if (report.fotoBefore) {
@@ -428,21 +429,21 @@ const generateReportImage = async (report: RoadReport): Promise<string> => {
       const speedVal = report.afterSpeed !== undefined ? report.afterSpeed : (report.panjangSegmen ? parseFloat(calculateSpeed(report.panjangSegmen, report.afterStopwatch).toFixed(1)) : 0);
       const speedText = `🚗 ${speedVal.toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j`;
 
-      ctx.font = 'bold 10px SFMono-Regular, Consolas, monospace';
+      ctx.font = 'bold 12.5px SFMono-Regular, Consolas, monospace';
       const timerWidth = ctx.measureText(timerText).width + 12;
 
       ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
-      drawRoundRect(ctx, 262, rightY, timerWidth, 22, 5);
+      drawRoundRect(ctx, 262, rightY, timerWidth, 24, 5);
       ctx.fill();
       ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)';
       ctx.stroke();
 
       ctx.fillStyle = '#10b981';
-      ctx.fillText(timerText, 267, rightY + 5.5);
+      ctx.fillText(timerText, 267, rightY + 6);
 
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillText(speedText, 262 + timerWidth + 10, rightY + 5.5);
-      rightY += 26;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(speedText, 262 + timerWidth + 10, rightY + 6);
+      rightY += 28;
     }
 
     if (report.fotoAfter) {
@@ -581,18 +582,58 @@ export const LaporJalan: React.FC = () => {
     return () => clearInterval(interval);
   }, [afterIsActive]);
 
-  // Load from localStorage on mount
+  // Load and clean reports older than 1 day
   useEffect(() => {
-    const saved = localStorage.getItem('autonomia_road_reports');
-    if (saved) {
-      try {
-        setReports(JSON.parse(saved));
-      } catch (e) {
-        console.error('Error parsing reports from localStorage', e);
-      }
-    }
+    const checkAndCleanReports = () => {
+      const saved = localStorage.getItem('autonomia_road_reports');
+      if (saved) {
+        try {
+          const parsed: RoadReport[] = JSON.parse(saved);
+          const now = Date.now();
+          const oneDayLimit = 24 * 60 * 60 * 1000;
+          
+          let hasExpired = false;
+          const activeReports = parsed.filter((report) => {
+            let timestamp = report.createdAt;
+            if (timestamp === undefined && report.id.startsWith('REP-')) {
+              const rawTime = parseInt(report.id.replace('REP-', ''), 10);
+              if (!isNaN(rawTime)) {
+                timestamp = rawTime;
+              }
+            }
+            
+            if (timestamp === undefined) {
+              return true;
+            }
+            
+            const isExpired = (now - timestamp) >= oneDayLimit;
+            if (isExpired) {
+              hasExpired = true;
+            }
+            return !isExpired;
+          });
 
-    // Default current day and date (e.g. "Jumat, 05 Juni 2026")
+          if (hasExpired) {
+            setReports(activeReports);
+            localStorage.setItem('autonomia_road_reports', JSON.stringify(activeReports));
+          } else {
+            setReports(parsed);
+          }
+        } catch (e) {
+          console.error('Error parsing reports from localStorage', e);
+        }
+      }
+    };
+
+    checkAndCleanReports();
+
+    // Check periodically for automatic data expiration (every 60 seconds)
+    const interval = setInterval(checkAndCleanReports, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Set default form date on mount
+  useEffect(() => {
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
@@ -656,7 +697,8 @@ export const LaporJalan: React.FC = () => {
       beforeStopwatch: beforeTime > 0 ? beforeTime : undefined,
       afterStopwatch: afterTime > 0 ? afterTime : undefined,
       beforeSpeed: beforeTime > 0 ? parseFloat(calculateSpeed(panjangSegmen, beforeTime).toFixed(2)) : undefined,
-      afterSpeed: afterTime > 0 ? parseFloat(calculateSpeed(panjangSegmen, afterTime).toFixed(2)) : undefined
+      afterSpeed: afterTime > 0 ? parseFloat(calculateSpeed(panjangSegmen, afterTime).toFixed(2)) : undefined,
+      createdAt: Date.now()
     };
 
     const updated = [newReport, ...reports];
@@ -726,7 +768,9 @@ export const LaporJalan: React.FC = () => {
 
   return (
     <div className="space-y-6 text-left animate-fade-in font-sans">
-      <div className="bg-slate-800/50 p-5 sm:p-6 rounded-2xl border border-slate-700/50 shadow-xl backdrop-blur-md">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Form Card (Sticky on PC for elegant navigation) */}
+        <div className="lg:col-span-5 lg:sticky lg:top-6 bg-slate-800/50 p-5 sm:p-6 rounded-2xl border border-slate-700/50 shadow-xl backdrop-blur-md">
         <h2 className="text-lg sm:text-xl font-bold text-slate-100 flex items-center gap-2 mb-6">
           <div className="p-2 bg-amber-500/10 rounded-xl text-amber-500">
             <ClipboardIcon className="h-5 w-5 shrink-0" />
@@ -1113,9 +1157,14 @@ export const LaporJalan: React.FC = () => {
       </div>
 
       {/* Reports History */}
-      <div className="bg-slate-800/50 p-5 sm:p-6 rounded-2xl border border-slate-700/50 shadow-xl backdrop-blur-md">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm sm:text-base font-bold text-slate-200">Daftar Pelaporan Masuk ({reports.length})</h3>
+      <div className="lg:col-span-7 bg-slate-800/50 p-5 sm:p-6 rounded-2xl border border-slate-700/50 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-slate-700/30 pb-3">
+          <div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-200">Daftar Pelaporan Masuk ({reports.length})</h3>
+            <p className="text-[10px] text-amber-400/80 font-semibold flex items-center gap-1 mt-1">
+              <span>⏱️</span> Laporan akan disimpan selama 1 hari (24 jam) lalu hilang/terhapus otomatis.
+            </p>
+          </div>
           {reports.length > 0 && (
             <button
               onClick={() => {
@@ -1123,7 +1172,7 @@ export const LaporJalan: React.FC = () => {
                   saveReports([]);
                 }
               }}
-              className="text-[10px] sm:text-xs text-rose-450 hover:text-rose-400 font-semibold flex items-center gap-1 cursor-pointer"
+              className="text-[10px] sm:text-xs text-rose-450 hover:text-rose-400 font-semibold flex items-center gap-1 cursor-pointer self-start sm:self-center"
             >
               <TrashIcon className="h-3 w-3" />
               Reset Semua
@@ -1210,11 +1259,11 @@ export const LaporJalan: React.FC = () => {
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[8px] text-slate-500 uppercase font-black">Before Image</span>
                             {report.beforeStopwatch !== undefined && (
-                              <div className="flex flex-wrap items-center justify-between gap-1 mt-0.5">
-                                <span className="text-[9px] font-mono text-rose-400 bg-rose-500/10 px-1 py-0.5 rounded font-bold">
+                              <div className="flex flex-col gap-1 mt-0.5">
+                                <span className="text-[11px] sm:text-xs font-mono text-rose-400 bg-rose-500/10 px-1.5 py-1 rounded-md font-extrabold w-max">
                                   ⏱️ {formatStopwatchTime(report.beforeStopwatch)}
                                 </span>
-                                <span className="text-[9px] font-mono font-extrabold text-slate-300">
+                                <span className="text-[11px] sm:text-xs font-mono font-black text-slate-200">
                                   🚗 {(report.beforeSpeed !== undefined ? report.beforeSpeed : (report.panjangSegmen ? calculateSpeed(report.panjangSegmen, report.beforeStopwatch) : 0)).toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j
                                 </span>
                               </div>
@@ -1236,11 +1285,11 @@ export const LaporJalan: React.FC = () => {
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[8px] text-slate-500 uppercase font-black">After Image</span>
                             {report.afterStopwatch !== undefined && (
-                              <div className="flex flex-wrap items-center justify-between gap-1 mt-0.5">
-                                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded font-bold">
+                              <div className="flex flex-col gap-1 mt-0.5">
+                                <span className="text-[11px] sm:text-xs font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-1 rounded-md font-extrabold w-max">
                                   ⏱️ {formatStopwatchTime(report.afterStopwatch)}
                                 </span>
-                                <span className="text-[9px] font-mono font-extrabold text-slate-300">
+                                <span className="text-[11px] sm:text-xs font-mono font-black text-slate-200">
                                   🚗 {(report.afterSpeed !== undefined ? report.afterSpeed : (report.panjangSegmen ? calculateSpeed(report.panjangSegmen, report.afterStopwatch) : 0)).toLocaleString('id-ID', { maximumFractionDigits: 1 })} km/j
                                 </span>
                               </div>
@@ -1275,6 +1324,7 @@ export const LaporJalan: React.FC = () => {
             })}
           </div>
         )}
+      </div>
       </div>
 
       {/* Modal Share WhatsApp */}
