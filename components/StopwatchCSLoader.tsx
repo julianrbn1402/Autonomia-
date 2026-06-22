@@ -205,10 +205,10 @@ export const StopwatchCSLoader: React.FC = () => {
 
             // 1. Header Banner of AUTONOMIA
             const header = document.createElement('div');
-            header.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.04) 50%, rgba(15, 23, 42, 0.3) 100%)';
-            header.style.padding = '22px';
+            header.style.background = 'linear-gradient(to right, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 50%, transparent 100%)';
+            header.style.padding = '20px 24px';
             header.style.borderRadius = '16px';
-            header.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+            header.style.border = '1px solid rgba(245, 158, 11, 0.2)';
             header.style.display = 'flex';
             header.style.alignItems = 'center';
             header.style.justifyContent = 'space-between';
@@ -217,7 +217,7 @@ export const StopwatchCSLoader: React.FC = () => {
             const headerLeft = document.createElement('div');
             headerLeft.style.display = 'flex';
             headerLeft.style.flexDirection = 'column';
-            headerLeft.style.gap = '6px';
+            headerLeft.style.gap = '2px';
 
             const logoContainer = document.createElement('div');
             logoContainer.style.display = 'flex';
@@ -225,49 +225,54 @@ export const StopwatchCSLoader: React.FC = () => {
             logoContainer.style.gap = '10px';
 
             const pulseDot = document.createElement('span');
-            pulseDot.style.height = '10px';
-            pulseDot.style.width = '10px';
+            pulseDot.style.height = '8px';
+            pulseDot.style.width = '8px';
             pulseDot.style.borderRadius = '50%';
             pulseDot.style.backgroundColor = '#f59e0b'; // amber-500
-            pulseDot.style.boxShadow = '0 0 12px #f59e0b';
+            pulseDot.style.boxShadow = '0 0 10px #f59e0b';
+            pulseDot.style.display = 'inline-block';
 
             const title = document.createElement('h2');
             title.innerText = 'AUTONOMIA';
-            title.style.fontSize = '28px';
+            title.style.fontSize = '24px';
             title.style.fontWeight = '900';
-            title.style.letterSpacing = '0.2em';
-            title.style.color = '#fbbf24'; // amber-400
-            title.style.fontFamily = "'Courier New', Courier, monospace";
+            title.style.letterSpacing = '0.15em';
+            title.style.backgroundImage = 'linear-gradient(to right, #fbbf24, #fcd34d, #fef08a)';
+            title.style.webkitBackgroundClip = 'text';
+            title.style.backgroundClip = 'text';
+            title.style.webkitTextFillColor = 'transparent';
+            title.style.color = '#fbbf24'; // Fallback text color
+            title.style.fontFamily = '"JetBrains Mono", ui-monospace, SFMono-Regular, monospace';
             title.style.margin = '0';
-            title.style.textShadow = '0 2px 4px rgba(0,0,0,0.4)';
+            title.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
 
             logoContainer.appendChild(pulseDot);
             logoContainer.appendChild(title);
 
             const subtitle = document.createElement('p');
             subtitle.innerText = 'Multi Stopwatch • Monitoring Operational';
-            subtitle.style.fontSize = '12px';
-            subtitle.style.color = '#cbd5e1'; // slate-300
-            subtitle.style.margin = '0';
-            subtitle.style.fontWeight = '600';
-            subtitle.style.letterSpacing = '0.05em';
-            subtitle.style.textTransform = 'uppercase';
+            subtitle.style.fontSize = '11px';
+            subtitle.style.color = '#94a3b8'; // Slate 400
+            subtitle.style.margin = '4px 0 0 0';
+            subtitle.style.fontWeight = '500';
+            subtitle.style.letterSpacing = '0.02em';
+            subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
 
             headerLeft.appendChild(logoContainer);
             headerLeft.appendChild(subtitle);
 
             const timestamp = document.createElement('div');
-            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
             const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            timestamp.innerText = `${dateStr}  ${timeStr}`;
-            timestamp.style.fontFamily = "'Courier New', Courier, monospace";
-            timestamp.style.fontSize = '13px';
-            timestamp.style.fontWeight = '700';
-            timestamp.style.color = '#fbbf24'; // amber-400
-            timestamp.style.backgroundColor = '#0f172a'; // slate-900
-            timestamp.style.padding = '8px 12px';
-            timestamp.style.borderRadius = '8px';
-            timestamp.style.border = '1px solid rgba(245, 158, 11, 0.2)';
+            timestamp.innerText = `${dateStr} • ${timeStr}`;
+            timestamp.style.fontFamily = '"JetBrains Mono", ui-monospace, SFMono-Regular, monospace';
+            timestamp.style.fontSize = '11px';
+            timestamp.style.fontWeight = '600';
+            timestamp.style.color = '#94a3b8'; // Slate 400
+            timestamp.style.backgroundColor = 'rgba(15, 23, 42, 0.4)'; // slate-900 shadow
+            timestamp.style.padding = '5px 10px';
+            timestamp.style.borderRadius = '6px';
+            timestamp.style.border = '1px solid #1e293b'; // slate-800
 
             header.appendChild(headerLeft);
             header.appendChild(timestamp);
@@ -276,21 +281,31 @@ export const StopwatchCSLoader: React.FC = () => {
             // 2. Stopwatch grid
             const cardsContainer = document.createElement('div');
             cardsContainer.style.display = 'grid';
-            cardsContainer.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+            if (loaders.length === 1) {
+                cardsContainer.style.gridTemplateColumns = '1fr';
+            } else {
+                cardsContainer.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+            }
             cardsContainer.style.gap = '14px';
             cardsContainer.style.boxSizing = 'border-box';
 
-            loaders.forEach((loader) => {
+            loaders.forEach((loader, index) => {
                 const card = document.createElement('div');
                 card.style.backgroundColor = '#0f172a'; // Slate 900 solid for maximum text contrast
                 card.style.padding = '20px';
                 card.style.borderRadius = '16px';
-                card.style.border = loader.isRunning ? '2px solid #f59e0b' : '1px solid #334155'; // Vibrant amber if running
+                // Use a consistent border width of 2px to ensure perfect visual alignment and prevent asymmetric sizing shifts!
+                card.style.border = loader.isRunning ? '2px solid rgba(245, 158, 11, 0.45)' : '2px solid #1e293b'; 
                 card.style.display = 'flex';
                 card.style.flexDirection = 'column';
                 card.style.justifyContent = 'space-between';
                 card.style.boxSizing = 'border-box';
                 card.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.2)';
+
+                // Span full columns if there is an odd number and this is the last card (preserves perfect visual balance!)
+                if (loaders.length > 1 && loaders.length % 2 !== 0 && index === loaders.length - 1) {
+                    card.style.gridColumn = 'span 2';
+                }
 
                 // Item Header
                 const itemHeader = document.createElement('div');
@@ -329,11 +344,11 @@ export const StopwatchCSLoader: React.FC = () => {
 
                 const timeValue = document.createElement('div');
                 timeValue.innerText = formatTime(loader.elapsedMs);
-                timeValue.style.fontFamily = "system-ui, -apple-system, sans-serif";
-                timeValue.style.fontSize = '28px'; // Enlarged
-                timeValue.style.fontWeight = '800';
+                timeValue.style.fontFamily = '"JetBrains Mono", ui-monospace, SFMono-Regular, monospace';
+                timeValue.style.fontSize = '26px'; // Perfect crisp size
+                timeValue.style.fontWeight = '700';
                 timeValue.style.letterSpacing = '0.04em';
-                timeValue.style.color = '#f59e0b'; // Amber-500
+                timeValue.style.color = '#fbbf24'; // Amber-400
                 timeValue.style.textShadow = '0 1px 2px rgba(0,0,0,0.6)';
 
                 const statusLabel = document.createElement('span');
@@ -475,6 +490,59 @@ export const StopwatchCSLoader: React.FC = () => {
         // Enforce safe API redirect by passing a non-empty space parameter. 
         // Bypasses the "couldn't open this chat link" WhatsApp API validation error.
         return `https://api.whatsapp.com/send?text=%20`;
+    };
+
+    // Advanced, frictionless sharing to WhatsApp: Attempt native Web Share first (great for mobile),
+    // otherwise auto-copy the screenshot image to clipboard and automatically open WhatsApp chat!
+    const handleWhatsAppShareWithAutoCopy = async () => {
+        let blobToCopy = screenshotBlob;
+        if (!blobToCopy && screenshotResult) {
+            blobToCopy = dataURItoBlob(screenshotResult);
+        }
+
+        if (!blobToCopy) {
+            alert('Gambar belum siap, silakan tunggu sebentar atau klik "Salin Gambar" secara manual.');
+            return;
+        }
+
+        const file = new File([blobToCopy], 'autonomia-stopwatch.png', { type: 'image/png' });
+
+        // Phase 1: Try Native system share API (Outstanding for mobile WA, attaches image natively!)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'AUTONOMIA - Multi Stopwatch',
+                });
+                return; // Shared natively with success!
+            } catch (shareErr) {
+                console.warn('Native Web Share aborted/failed, using copy+redirect fallback:', shareErr);
+            }
+        }
+
+        // Phase 2: Copy image programmatically to clipboard
+        let isCopied = false;
+        try {
+            if (typeof ClipboardItem !== 'undefined') {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        [blobToCopy.type]: blobToCopy
+                    })
+                ]);
+                isCopied = true;
+                setCopiedSuccess(true);
+                setCopyError(false);
+                setTimeout(() => setCopiedSuccess(false), 4000);
+            }
+        } catch (copyErr) {
+            console.warn('Auto copy within share failed:', copyErr);
+            setCopyError(true);
+            setTimeout(() => setCopyError(false), 8000);
+        }
+
+        // Phase 3: Redirect to WhatsApp Web/App
+        const waUrl = getWhatsAppUrl();
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
     };
 
     return (
@@ -663,21 +731,41 @@ export const StopwatchCSLoader: React.FC = () => {
 
                         {/* Modal Content */}
                         <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-left">
+                            {/* Browser/Iframe Context Checker */}
+                            {typeof window !== 'undefined' && window.self !== window.top && (
+                                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 p-3.5 rounded-xl text-[11px] leading-relaxed font-sans flex flex-col gap-1.5">
+                                    <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-amber-400">
+                                        <span>⚠️</span> DETEKSI MODE PREVIEW IFRAME
+                                    </div>
+                                    <p>
+                                        Browser melarang pengambilan Clipboard otomatis di dalam Frame ini. Untuk kenyamanan fitur <strong>Auto-Salin + Auto-Buka</strong>, Anda disarankan membuka aplikasi di:
+                                    </p>
+                                    <a 
+                                        href={window.location.href} 
+                                        target="_blank" 
+                                        rel="noreferrer" 
+                                        className="self-start inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-colors mt-1"
+                                    >
+                                        Buka di Tab Baru ↗
+                                    </a>
+                                </div>
+                            )}
+
                             <div className="bg-gradient-to-br from-slate-950 to-slate-900/80 p-4 rounded-xl border border-slate-800/90 text-xs text-slate-350 space-y-2.5 font-sans leading-relaxed">
                                 <p className="font-bold text-amber-400 flex items-center gap-1.5 text-xs sm:text-sm mb-1 uppercase tracking-wide">
-                                    <span>💡</span> CARA BERBAGI YANG SANGAT MUDAH:
+                                    <span>💡</span> CARA PASTI BERHASIL BERBAGI KE WHATSAPP:
                                 </p>
                                 <div className="flex items-start gap-2">
                                     <span className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-800 text-[10px] shrink-0 text-white font-bold font-mono">1</span>
-                                    <p>Klik tombol <strong className="text-amber-400 font-semibold underline">✂ Salin Gambar</strong> untuk menyalin gambar screenshot ke clipboard perangkat Anda.</p>
+                                    <p>Klik tombol hijau <strong className="text-emerald-400 font-semibold underline">Auto-Salin & Buka WhatsApp</strong> di bawah. Gambar akan disalin otomatis & WhatsApp akan terbuka.</p>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <span className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-800 text-[10px] shrink-0 text-white font-bold font-mono">2</span>
-                                    <p>Klik tombol hijau <strong className="text-emerald-400 font-semibold underline">Buka WhatsApp & Tempel Gambar</strong>. Tab WhatsApp baru akan terbuka otomatis.</p>
+                                    <p>Di ruang obrolan WhatsApp, cukup tekan tombol <strong className="text-white bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono">Ctrl + V</strong> (atau klik kanan lalu pilih <strong>Paste/Tempel</strong>) untuk langsung mengirimkan gambar stopwatch!</p>
                                 </div>
-                                <div className="flex items-start gap-2">
-                                    <span className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-800 text-[10px] shrink-0 text-white font-bold font-mono">3</span>
-                                    <p>Pilih ruang obrolan Anda, lalu tekan tombol <strong className="text-white bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono">Ctrl + V</strong> (atau klik kanan lalu pilih Paste) untuk melampirkan <strong className="text-amber-400 font-semibold">gambar stopwatch saja</strong> tanpa beban teks caption!</p>
+                                <div className="flex items-start gap-2 text-slate-455 border-t border-slate-800/60 pt-2 mt-1">
+                                    <span className="text-[11px]">🔧</span>
+                                    <p><strong className="text-slate-250">Gagal salin otomatis?</strong> Cukup <strong className="text-amber-400 font-semibold">klik kanan / tekan lama</strong> pada foto preview di bawah ini, lalu pilih <strong className="text-white">Salin Gambar (Copy Image)</strong>, selanjutnya Paste di WhatsApp.</p>
                                 </div>
                             </div>
 
@@ -713,7 +801,7 @@ export const StopwatchCSLoader: React.FC = () => {
                             
                             {copyError && (
                                 <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-3 rounded-xl text-[11px] sm:text-xs leading-relaxed animate-fade-in">
-                                    ⚠️ Platform membatasi clipboard otomatis. Silakan klik kanan draf di atas, pilih <strong className="text-white font-semibold">Salin Gambar (Copy Image)</strong>, atau gunakan tombol download di bawah ini.
+                                    ⚠️ Platform membatasi clipboard otomatis. Silakan klik kanan gambar pratinjau di atas, pilih <strong className="text-white font-semibold">Salin Gambar (Copy Image)</strong>, atau gunakan tombol download di bawah ini.
                                 </div>
                             )}
                         </div>
@@ -723,27 +811,25 @@ export const StopwatchCSLoader: React.FC = () => {
                             <div className="grid grid-cols-2 gap-2.5">
                                 <button
                                     onClick={handleCopyImage}
-                                    className="py-3 px-4 bg-slate-900 hover:bg-slate-850 active:scale-[0.98] text-slate-200 hover:text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-700/50 hover:border-slate-600 shadow-sm"
+                                    className="py-3 px-4 bg-slate-900 hover:bg-slate-850 active:scale-[0.98] text-slate-200 hover:text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-700/50 hover:border-slate-600 shadow-sm font-sans"
                                 >
                                     <span>✂ Salin Gambar (Clipboard)</span>
                                 </button>
                                 <button
                                     onClick={handleDownloadImage}
-                                    className="py-3 px-4 bg-slate-900 hover:bg-slate-850 active:scale-[0.98] text-slate-200 hover:text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-700/50 hover:border-slate-600 shadow-sm"
+                                    className="py-3 px-4 bg-slate-900 hover:bg-slate-850 active:scale-[0.98] text-slate-200 hover:text-white font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 border border-slate-700/50 hover:border-slate-600 shadow-sm font-sans"
                                 >
                                     <span>📥 Download Gambar PNG</span>
                                 </button>
                             </div>
 
-                            <a
-                                href={getWhatsAppUrl()}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.99] text-white font-bold rounded-xl text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 text-center"
+                            <button
+                                onClick={handleWhatsAppShareWithAutoCopy}
+                                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.99] text-white font-bold rounded-xl text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 text-center font-sans"
                             >
                                 <WhatsappIcon className="h-5 w-5 shrink-0 fill-current" />
-                                <span>Buka WhatsApp & Tempel Gambar</span>
-                            </a>
+                                <span>Auto-Salin & Buka WhatsApp</span>
+                            </button>
                         </div>
 
                     </div>
