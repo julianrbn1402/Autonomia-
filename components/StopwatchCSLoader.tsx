@@ -203,78 +203,74 @@ export const StopwatchCSLoader: React.FC = () => {
             container.style.gap = '24px';
             container.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.5)';
 
-            // 1. Header Banner of AUTONOMIA
+            // 1. Header Banner of AUTONOMIA (Symmetrically Centered Layout)
             const header = document.createElement('div');
-            header.style.background = 'linear-gradient(to right, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 50%, transparent 100%)';
-            header.style.padding = '20px 24px';
+            header.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.5) 100%)';
+            header.style.padding = '24px 20px';
             header.style.borderRadius = '16px';
-            header.style.border = '1px solid rgba(245, 158, 11, 0.2)';
+            header.style.border = '1.5px solid rgba(245, 158, 11, 0.25)';
             header.style.display = 'flex';
+            header.style.flexDirection = 'column'; // Center-aligned stacked layout for absolute symmetry
             header.style.alignItems = 'center';
-            header.style.justifyContent = 'space-between';
+            header.style.justifyContent = 'center';
+            header.style.gap = '8px';
+            header.style.textAlign = 'center';
             header.style.boxSizing = 'border-box';
-
-            const headerLeft = document.createElement('div');
-            headerLeft.style.display = 'flex';
-            headerLeft.style.flexDirection = 'column';
-            headerLeft.style.gap = '2px';
 
             const logoContainer = document.createElement('div');
             logoContainer.style.display = 'flex';
             logoContainer.style.alignItems = 'center';
+            logoContainer.style.justifyContent = 'center';
             logoContainer.style.gap = '10px';
 
             const pulseDot = document.createElement('span');
-            pulseDot.style.height = '8px';
-            pulseDot.style.width = '8px';
+            pulseDot.style.height = '10px';
+            pulseDot.style.width = '10px';
             pulseDot.style.borderRadius = '50%';
             pulseDot.style.backgroundColor = '#f59e0b'; // amber-500
-            pulseDot.style.boxShadow = '0 0 10px #f59e0b';
+            pulseDot.style.boxShadow = '0 0 12px #f59e0b';
             pulseDot.style.display = 'inline-block';
 
             const title = document.createElement('h2');
             title.innerText = 'AUTONOMIA';
-            title.style.fontSize = '24px';
+            title.style.fontSize = '28px'; // Enlarged and prominent like the big application title
             title.style.fontWeight = '900';
-            title.style.letterSpacing = '0.15em';
-            title.style.backgroundImage = 'linear-gradient(to right, #fbbf24, #fcd34d, #fef08a)';
-            title.style.webkitBackgroundClip = 'text';
-            title.style.backgroundClip = 'text';
-            title.style.webkitTextFillColor = 'transparent';
-            title.style.color = '#fbbf24'; // Fallback text color
+            title.style.letterSpacing = '0.18em';
+            // We use solid amber-400 to guarantee perfect high-contrast rendering since gradients are highly broken in html2canvas!
+            title.style.color = '#fbbf24'; 
             title.style.fontFamily = '"JetBrains Mono", ui-monospace, SFMono-Regular, monospace';
             title.style.margin = '0';
-            title.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
+            title.style.textShadow = '0 2px 5px rgba(0,0,0,0.4)';
 
             logoContainer.appendChild(pulseDot);
             logoContainer.appendChild(title);
 
             const subtitle = document.createElement('p');
             subtitle.innerText = 'Multi Stopwatch • Monitoring Operational';
-            subtitle.style.fontSize = '11px';
-            subtitle.style.color = '#94a3b8'; // Slate 400
-            subtitle.style.margin = '4px 0 0 0';
-            subtitle.style.fontWeight = '500';
-            subtitle.style.letterSpacing = '0.02em';
+            subtitle.style.fontSize = '12px';
+            subtitle.style.color = '#cbd5e1'; // Slate 300 for crisp readability
+            subtitle.style.margin = '0';
+            subtitle.style.fontWeight = '600';
+            subtitle.style.letterSpacing = '0.04em';
             subtitle.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-
-            headerLeft.appendChild(logoContainer);
-            headerLeft.appendChild(subtitle);
+            subtitle.style.textTransform = 'uppercase';
 
             const timestamp = document.createElement('div');
-            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+            const dateStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
             const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            timestamp.innerText = `${dateStr} • ${timeStr}`;
+            timestamp.innerText = `${dateStr}  •  ${timeStr}`;
             timestamp.style.fontFamily = '"JetBrains Mono", ui-monospace, SFMono-Regular, monospace';
             timestamp.style.fontSize = '11px';
-            timestamp.style.fontWeight = '600';
+            timestamp.style.fontWeight = '700';
             timestamp.style.color = '#94a3b8'; // Slate 400
-            timestamp.style.backgroundColor = 'rgba(15, 23, 42, 0.4)'; // slate-900 shadow
-            timestamp.style.padding = '5px 10px';
-            timestamp.style.borderRadius = '6px';
+            timestamp.style.backgroundColor = 'rgba(15, 23, 42, 0.6)'; // slate-900 background shadow
+            timestamp.style.padding = '6px 14px';
+            timestamp.style.borderRadius = '8px';
             timestamp.style.border = '1px solid #1e293b'; // slate-800
+            timestamp.style.marginTop = '4px';
 
-            header.appendChild(headerLeft);
+            header.appendChild(logoContainer);
+            header.appendChild(subtitle);
             header.appendChild(timestamp);
             container.appendChild(header);
 
