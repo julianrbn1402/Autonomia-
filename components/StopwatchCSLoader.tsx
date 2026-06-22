@@ -410,20 +410,9 @@ export const StopwatchCSLoader: React.FC = () => {
         link.click();
     };
 
-    // Generate WhatsApp Text Share Link of current state
+    // Open WhatsApp directly without any caption text (image-only sharing via paste)
     const getWhatsAppUrl = () => {
-        const titleText = `*AUTONOMIA - MULTI STOPWATCH*\n_Monitoring Operational_\n\n`;
-        const dateText = `Tanggal: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
-        const timeText = `Waktu Share: ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}\n\n`;
-        const itemsText = loaders.map((l, idx) => {
-            const num = idx + 1;
-            const status = l.isRunning ? '🟢 Running' : '🔴 Paused';
-            return `${num}. *${l.unitName}*: ${formatTime(l.elapsedMs)} [${status}]`;
-        }).join('\n');
-        
-        const footerText = `\n\n_Sent via AUTONOMIA Web App_`;
-        const fullMessage = `${titleText}${dateText}${timeText}${itemsText}${footerText}`;
-        return `https://api.whatsapp.com/send?text=${encodeURIComponent(fullMessage)}`;
+        return `https://api.whatsapp.com/send`;
     };
 
     return (
@@ -622,11 +611,11 @@ export const StopwatchCSLoader: React.FC = () => {
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <span className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-800 text-[10px] shrink-0 text-white font-bold font-mono">2</span>
-                                    <p>Klik tombol hijau <strong className="text-emerald-400 font-semibold underline">Kirim via WhatsApp</strong>. Aplikasi WhatsApp akan terbuka otomatis.</p>
+                                    <p>Klik tombol hijau <strong className="text-emerald-400 font-semibold underline">Buka WhatsApp & Tempel Gambar</strong>. Tab WhatsApp baru akan terbuka otomatis.</p>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <span className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-800 text-[10px] shrink-0 text-white font-bold font-mono">3</span>
-                                    <p>Pilih chat tujuan sekuriti / fleet Anda, lalu tekan tombol <strong className="text-white bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono">Ctrl + V</strong> (Hp/laptop) untuk menempelkan draf gambar stopwatch yang dinamis tadi!</p>
+                                    <p>Pilih ruang obrolan Anda, lalu tekan tombol <strong className="text-white bg-slate-800 px-1.5 py-0.5 rounded text-[10px] font-mono">Ctrl + V</strong> (atau klik kanan lalu pilih Paste) untuk melampirkan <strong className="text-amber-400 font-semibold">gambar stopwatch saja</strong> tanpa beban teks caption!</p>
                                 </div>
                             </div>
 
@@ -691,7 +680,7 @@ export const StopwatchCSLoader: React.FC = () => {
                                 className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.99] text-white font-bold rounded-xl text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 text-center"
                             >
                                 <WhatsappIcon className="h-5 w-5 shrink-0 fill-current" />
-                                <span>Kirim via WhatsApp (Draf Teks)</span>
+                                <span>Buka WhatsApp & Tempel Gambar</span>
                             </a>
                         </div>
 
