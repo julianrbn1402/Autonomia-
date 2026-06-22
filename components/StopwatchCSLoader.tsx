@@ -34,6 +34,7 @@ export const StopwatchCSLoader: React.FC = () => {
 
     const [isGeneratingScreenshot, setIsGeneratingScreenshot] = useState(false);
     const [screenshotResult, setScreenshotResult] = useState<string | null>(null);
+    const [screenshotBlob, setScreenshotBlob] = useState<Blob | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [copiedSuccess, setCopiedSuccess] = useState(false);
     const [copyError, setCopyError] = useState(false);
@@ -160,15 +161,35 @@ export const StopwatchCSLoader: React.FC = () => {
         })));
     };
 
+    // Helper function to convert base64 image data to a native Blob synchronously
+    const dataURItoBlob = (dataURI: string) => {
+        try {
+            const splitData = dataURI.split(',');
+            const byteString = atob(splitData[1]);
+            const mimeString = splitData[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        } catch (e) {
+            console.error('Error converting data URI to Blob:', e);
+            return null;
+        }
+    };
+
     // Capture area callback using a layout-stabilized off-screen template
     const handleShareToWhatsApp = async () => {
         setIsGeneratingScreenshot(true);
+        let container: HTMLDivElement | null = null;
         try {
-            // Create a temporary container off-screen for perfect format representation
-            const container = document.createElement('div');
+            // Create a temporary container for perfect high-definition representation
+            container = document.createElement('div');
             container.style.position = 'fixed';
-            container.style.left = '-9999px';
+            container.style.left = '0';
             container.style.top = '0';
+            container.style.zIndex = '-9999';
             container.style.width = '620px'; // Stabilized width for beautiful layout
             container.style.backgroundColor = '#0b0f19'; // Deep rich blue-black
             container.style.padding = '28px';
@@ -351,10 +372,13 @@ export const StopwatchCSLoader: React.FC = () => {
             // Append to body to get rendered correctly by browser DOM engine
             document.body.appendChild(container);
 
-            // Capture screenshot of the dedicated container
+            // Short timeout to let layout settle perfectly in browser DOM
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Capture screenshot of the dedicated container (scale 2.0 is highly optimized and memory-friendly in iframe)
             const canvas = await html2canvas(container, {
                 backgroundColor: '#070a13', // Deep navy black match
-                scale: 2.5, // High definition scale for clear text output
+                scale: 2.0, // Reduced from 2.5 to avoid memory allocation or out-of-memory crashes on mobile/iframe
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
@@ -362,42 +386,78 @@ export const StopwatchCSLoader: React.FC = () => {
                 scrollY: 0,
             });
 
-            // Erase the temporary capture canvas element
-            document.body.removeChild(container);
-
             const dataUrl = canvas.toDataURL('image/png');
             setScreenshotResult(dataUrl);
+
+            const blob = dataURItoBlob(dataUrl);
+            setScreenshotBlob(blob);
+
             setShowModal(true);
         } catch (error) {
-            console.error('Error while capturing screenshot:', error);
+            console.error('Offscreen canvas capture failed, retrying on visible element...', error);
+
+            // FALLBACK: Try to capture the live element on the screen directly!
+            try {
+                const liveElement = document.getElementById('autonomia-stopwatch-results');
+                if (liveElement) {
+                    const canvas = await html2canvas(liveElement, {
+                        backgroundColor: '#020617', // Match slate-950
+                        scale: 2.0,
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                    });
+                    const dataUrl = canvas.toDataURL('image/png');
+                    setScreenshotResult(dataUrl);
+
+                    const blob = dataURItoBlob(dataUrl);
+                    setScreenshotBlob(blob);
+
+                    setShowModal(true);
+                } else {
+                    alert('Gagal mengambil screenshot: Elemen tidak ditemukan.');
+                }
+            } catch (fallbackError) {
+                console.error('Fallback capture also failed:', fallbackError);
+                alert('Gagal membuat screenshot gambar. Silakan coba lagi.');
+            }
         } finally {
+            if (container && container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
             setIsGeneratingScreenshot(false);
         }
     };
 
-    // Copy captured image to clipboard
+    // Copy captured image to clipboard (fully synchronous & direct gesture friendly)
     const handleCopyImage = async () => {
-        if (!screenshotResult) return;
+        let blobToCopy = screenshotBlob;
+
+        // If not already preloaded, generate it synchronously from the data URI
+        if (!blobToCopy && screenshotResult) {
+            blobToCopy = dataURItoBlob(screenshotResult);
+        }
+
+        if (!blobToCopy) return;
+
         try {
-            const res = await fetch(screenshotResult);
-            const blob = await res.blob();
-            
             if (typeof ClipboardItem !== 'undefined') {
                 await navigator.clipboard.write([
                     new ClipboardItem({
-                        [blob.type]: blob
+                        [blobToCopy.type]: blobToCopy
                     })
                 ]);
                 setCopiedSuccess(true);
                 setCopyError(false);
                 setTimeout(() => setCopiedSuccess(false), 3000);
             } else {
-                throw new Error('ClipboardItem API not supported');
+                throw new Error('ClipboardItem API not supported on this browser');
             }
         } catch (err) {
-            console.warn('Failed to copy image automatically:', err);
+            console.warn('Direct fast-copy failed:', err);
+            // Show custom manual copy warning inside the modal
             setCopyError(true);
-            setTimeout(() => setCopyError(false), 5000);
+            setTimeout(() => setCopyError(false), 8000);
         }
     };
 
