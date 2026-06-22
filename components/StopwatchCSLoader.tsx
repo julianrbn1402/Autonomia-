@@ -472,7 +472,9 @@ export const StopwatchCSLoader: React.FC = () => {
 
     // Open WhatsApp directly without any caption text (image-only sharing via paste)
     const getWhatsAppUrl = () => {
-        return `https://api.whatsapp.com/send`;
+        // Enforce safe API redirect by passing a non-empty space parameter. 
+        // Bypasses the "couldn't open this chat link" WhatsApp API validation error.
+        return `https://api.whatsapp.com/send?text=%20`;
     };
 
     return (
