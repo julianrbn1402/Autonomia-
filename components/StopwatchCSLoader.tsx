@@ -39,6 +39,13 @@ export const StopwatchCSLoader: React.FC = () => {
     const [copiedSuccess, setCopiedSuccess] = useState(false);
     const [copyError, setCopyError] = useState(false);
 
+    // Secret edit state hooks
+    const [editModeId, setEditModeId] = useState<string | null>(null);
+    const [clickCounts, setClickCounts] = useState<Record<string, { count: number; lastTime: number }>>({});
+    const [editMinutes, setEditMinutes] = useState('0');
+    const [editSeconds, setEditSeconds] = useState('0');
+    const [editCentiseconds, setEditCentiseconds] = useState('0');
+
     // Save to localStorage whenever loaders change
     useEffect(() => {
         localStorage.setItem('autonomia_stopwatch_cs_loaders', JSON.stringify(loaders));
@@ -84,6 +91,79 @@ export const StopwatchCSLoader: React.FC = () => {
             return `${pad(h)}:${pad(m)}:${pad(s)}.${pad(cs)}`;
         }
         return `${pad(m)}:${pad(s)}.${pad(cs)}`;
+    };
+
+    // Process clicks on stopwatch number to trigger the secret editable inputs
+    const handleTimeClick = (loader: CSLoaderItem) => {
+        const now = Date.now();
+        const prev = clickCounts[loader.id] || { count: 0, lastTime: 0 };
+        
+        let newCount = 1;
+        if (now - prev.lastTime < 1500) {
+            newCount = prev.count + 1;
+        }
+        
+        if (newCount >= 5) {
+            // Un-run loader and compute finalMs in-stride to prevent drift
+            setLoaders(prevLoaders => prevLoaders.map(l => {
+                if (l.id === loader.id) {
+                    let finalMs = l.elapsedMs;
+                    if (l.isRunning && l.startTime !== null) {
+                        finalMs += (Date.now() - l.startTime);
+                    }
+                    
+                    const m = Math.floor((finalMs % 3600000) / 60000 + Math.floor(finalMs / 3600000) * 60);
+                    const s = Math.floor((finalMs % 60000) / 1000);
+                    const cs = Math.floor((finalMs % 1000) / 10);
+                    
+                    setEditMinutes(m.toString());
+                    setEditSeconds(s.toString());
+                    setEditCentiseconds(cs.toString());
+                    setEditModeId(loader.id);
+                    
+                    return {
+                        ...l,
+                        isRunning: false,
+                        elapsedMs: finalMs,
+                        startTime: null
+                    };
+                }
+                return l;
+            }));
+
+            // Reset count
+            setClickCounts(prevCounts => ({
+                ...prevCounts,
+                [loader.id]: { count: 0, lastTime: 0 }
+            }));
+        } else {
+            setClickCounts(prevCounts => ({
+                ...prevCounts,
+                [loader.id]: { count: newCount, lastTime: now }
+            }));
+        }
+    };
+
+    const handleSaveEdit = (id: string) => {
+        const mins = parseInt(editMinutes, 10) || 0;
+        const secs = parseInt(editSeconds, 10) || 0;
+        const csecs = parseInt(editCentiseconds, 10) || 0;
+        
+        const newMs = (mins * 60000) + (secs * 1000) + (csecs * 10);
+        
+        setLoaders(prev => prev.map(loader => {
+            if (loader.id === id) {
+                return {
+                    ...loader,
+                    elapsedMs: Math.max(0, newMs),
+                    isRunning: false,
+                    startTime: null
+                };
+            }
+            return loader;
+        }));
+        
+        setEditModeId(null);
     };
 
     // Actions
@@ -612,13 +692,73 @@ export const StopwatchCSLoader: React.FC = () => {
                                     </div>
 
                                     {/* Monospaced digital display */}
-                                    <div className="py-2.5 sm:py-4 text-center select-none font-sans">
-                                        <div className="font-mono text-xs sm:text-lg md:text-xl font-bold tracking-wider text-amber-400 tabular-nums">
-                                            {formatTime(loader.elapsedMs)}
-                                        </div>
-                                        <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-slate-500 font-semibold block mt-0.5">
-                                            {loader.isRunning ? 'Running' : 'Paused'}
-                                        </span>
+                                    <div className="py-2 sm:py-3.5 text-center font-sans select-none">
+                                        {editModeId === loader.id ? (
+                                            <div className="flex flex-col items-center justify-center space-y-2 py-0.5" data-html2canvas-ignore="true">
+                                                <div className="flex items-center gap-1.5 text-slate-100 font-mono">
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[7px] text-slate-500 uppercase tracking-wider mb-0.5 font-bold">Mins</span>
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            value={editMinutes}
+                                                            onChange={(e) => setEditMinutes(e.target.value)}
+                                                            className="w-11 bg-slate-950 text-amber-400 font-mono text-center font-bold text-xs sm:text-sm border border-slate-700/60 rounded px-1 py-0.5 outline-none focus:border-amber-500 transition-colors"
+                                                        />
+                                                    </div>
+                                                    <span className="text-slate-500 font-bold self-end mb-1">:</span>
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[7px] text-slate-500 uppercase tracking-wider mb-0.5 font-bold">Secs</span>
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            max="59"
+                                                            value={editSeconds}
+                                                            onChange={(e) => setEditSeconds(e.target.value)}
+                                                            className="w-11 bg-slate-950 text-amber-400 font-mono text-center font-bold text-xs sm:text-sm border border-slate-700/60 rounded px-1 py-0.5 outline-none focus:border-amber-500 transition-colors"
+                                                        />
+                                                    </div>
+                                                    <span className="text-slate-500 font-bold self-end mb-1">.</span>
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-[7px] text-slate-500 uppercase tracking-wider mb-0.5 font-bold">CS</span>
+                                                        <input 
+                                                            type="number"
+                                                            min="0"
+                                                            max="99"
+                                                            value={editCentiseconds}
+                                                            onChange={(e) => setEditCentiseconds(e.target.value)}
+                                                            className="w-11 bg-slate-950 text-amber-400 font-mono text-center font-bold text-xs sm:text-sm border border-slate-700/60 rounded px-1 py-0.5 outline-none focus:border-amber-500 transition-colors"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <button
+                                                        onClick={() => handleSaveEdit(loader.id)}
+                                                        className="px-2 py-0.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-bold rounded transition cursor-pointer"
+                                                    >
+                                                        Simpan
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditModeId(null)}
+                                                        className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[9px] sm:text-[10px] font-semibold rounded transition cursor-pointer"
+                                                    >
+                                                        Batal
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div 
+                                                    onClick={() => handleTimeClick(loader)}
+                                                    className="font-mono text-xs sm:text-lg md:text-xl font-bold tracking-wider text-amber-400 tabular-nums select-none"
+                                                >
+                                                    {formatTime(loader.elapsedMs)}
+                                                </div>
+                                                <span className="text-[7px] sm:text-[9px] uppercase tracking-widest text-slate-500 font-semibold block mt-0.5">
+                                                    {loader.isRunning ? 'Running' : 'Paused'}
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
 
                                     {/* Controls (Excluded from screenshots for cleaner files) */}
