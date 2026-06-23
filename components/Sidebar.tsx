@@ -10,66 +10,120 @@ const AnimatedBrainIcon: React.FC<{ size?: number; className?: string }> = ({ si
     className={`text-amber-500 ${className || ''}`}
     aria-hidden="true"
   >
+    <defs>
+      <linearGradient id="luxuryGold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#d97706" />
+        <stop offset="25%" stopColor="#fbbf24" />
+        <stop offset="50%" stopColor="#fffbeb" />
+        <stop offset="75%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#b45309" />
+      </linearGradient>
+      
+      <linearGradient id="royalSapphire" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#1e1b4b" />
+        <stop offset="100%" stopColor="#020617" />
+      </linearGradient>
+      
+      <radialGradient id="royalGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#fef08a" stopOpacity="0.45" />
+        <stop offset="50%" stopColor="#f59e0b" stopOpacity="0.15" />
+        <stop offset="100%" stopColor="#b45309" stopOpacity="0" />
+      </radialGradient>
+
+      <filter id="royalShadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="1.8" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
     <style>{`
       @keyframes ray-rotate {
         0% { transform: rotate(0deg); }
-        105% { transform: rotate(360deg); }
+        100% { transform: rotate(360deg); }
       }
       @keyframes wing-breathe-left {
-        0%, 100% { transform: translate(0px, 0px) scale(0.98); }
-        55% { transform: translate(-1.5px, 0px) scale(1.02); }
+        0%, 100% { transform: translate(0px, 0px) scale(0.97) rotate(0deg); }
+        50% { transform: translate(-2px, 0.5px) scale(1.03) rotate(-2deg); }
       }
       @keyframes wing-breathe-right {
-        0%, 100% { transform: translate(0px, 0px) scale(0.98); }
-        55% { transform: translate(1.5px, 0px) scale(1.02); }
+        0%, 100% { transform: translate(0px, 0px) scale(0.97) rotate(0deg); }
+        50% { transform: translate(2px, 0.5px) scale(1.03) rotate(2deg); }
       }
       @keyframes central-glow {
-        0%, 100% { filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.4)); }
-        50% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.85)); }
+        0%, 100% { filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.5)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.2)); }
+        50% { filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.9)) drop-shadow(0 0 4px rgba(251, 191, 36, 0.6)); }
+      }
+      @keyframes gear-rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes gear-rotate-reverse {
+        0% { transform: rotate(360deg); }
+        100% { transform: rotate(0deg); }
       }
       .animate-rays {
         transform-origin: 32px 32px;
-        animation: ray-rotate 28s linear infinite;
+        animation: ray-rotate 32s linear infinite;
       }
       .animate-wing-left {
         transform-origin: 23px 34px;
-        animation: wing-breathe-left 2.5s ease-in-out infinite;
+        animation: wing-breathe-left 2.8s ease-in-out infinite;
       }
       .animate-wing-right {
         transform-origin: 41px 34px;
-        animation: wing-breathe-right 2.5s ease-in-out infinite;
+        animation: wing-breathe-right 2.8s ease-in-out infinite;
       }
       .animate-central-brain {
-        animation: central-glow 3s ease-in-out infinite;
+        animation: central-glow 2.5s ease-in-out infinite;
+      }
+      .animate-outer-gear {
+        transform-origin: 32px 32px;
+        animation: gear-rotate 45s linear infinite;
+      }
+      .animate-inner-gear {
+        transform-origin: 32px 32px;
+        animation: gear-rotate-reverse 25s linear infinite;
       }
     `}</style>
+    
+    {/* Outer luxury orbits */}
+    <circle cx="32" cy="32" r="30" fill="none" stroke="url(#luxuryGold)" strokeWidth="0.75" opacity="0.6" strokeDasharray="5, 3" className="animate-outer-gear" />
+    <circle cx="32" cy="32" r="27.5" fill="none" stroke="url(#luxuryGold)" strokeWidth="0.5" opacity="0.35" strokeDasharray="1, 5" className="animate-inner-gear" />
+    
+    {/* Ambient center glow */}
+    <circle cx="32" cy="32" r="20" fill="url(#royalGlow)" pointerEvents="none" />
+
+    {/* Golden rays rotating in background */}
     <g className="brain-ray-group animate-rays">
-      <path d="M32 0 L 30 10 L 34 10 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M54.3 9.7 L 49.5 14.5 L 51.5 16.5 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M64 32 L 54 30 L 54 34 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M54.3 54.3 L 49.5 49.5 L 51.5 47.5 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M32 64 L 30 54 L 34 54 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M9.7 54.3 L 14.5 49.5 L 12.5 47.5 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M0 32 L 10 30 L 10 34 Z" fill="currentColor" opacity="0.8"/>
-      <path d="M9.7 9.7 L 14.5 14.5 L 12.5 16.5 Z" fill="currentColor" opacity="0.8"/>
+      <path d="M32 0 L 29.5 9.5 L 34.5 9.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M54.3 9.7 L 48.5 13.5 L 50.5 15.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M64 32 L 54.5 29.5 L 54.5 34.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M54.3 54.3 L 48.5 50.5 L 50.5 48.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M32 64 L 29.5 54.5 L 34.5 54.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M9.7 54.3 L 15.5 50.5 L 13.5 48.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M0 32 L 9.5 29.5 L 9.5 34.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
+      <path d="M9.7 9.7 L 15.5 13.5 L 13.5 15.5 Z" fill="url(#luxuryGold)" opacity="0.85"/>
     </g>
     
-    <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-central-brain">
-        {/* Left Wing */}
+    {/* Luxury glowing brain unit */}
+    <g stroke="url(#luxuryGold)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-central-brain">
+        {/* Breathing Golden Wings */}
         <g className="brain-wing-left animate-wing-left">
-            <path d="M23 26 C 12 28, 12 40, 23 42 L 18 34 Z" fill="currentColor" />
+            <path d="M23 26 C 11 27, 11 41, 23 42 L 17 34 Z" fill="url(#luxuryGold)" filter="url(#royalShadow)" />
         </g>
         
-        {/* Right Wing */}
         <g className="brain-wing-right animate-wing-right">
-             <path d="M41 26 C 52 28, 52 40, 41 42 L 46 34 Z" fill="currentColor" />
+             <path d="M41 26 C 53 27, 53 41, 41 42 L 47 34 Z" fill="url(#luxuryGold)" filter="url(#royalShadow)" />
         </g>
         
-        {/* Brain */}
-        <path d="M32,22 C26,22 23,28 23,34 C23,42 28,46 32,46 C36,46 41,42 41,34 C41,28 38,22 32,22 Z" fill="#1e293b" strokeWidth="2.5" />
-        <path d="M32,22 C34,28 34,32 32,46" strokeWidth="1.5"/>
-        <path d="M28,24 C30,30 29,36 28,44" strokeWidth="1.5"/>
-        <path d="M36,24 C34,30 35,36 36,44" strokeWidth="1.5"/>
+        {/* Core brain piece with deep midnight blue background and gold border */}
+        <path d="M32,22 C26,22 23,28 23,34 C23,42 28,46 32,46 C36,46 41,42 41,34 C41,28 38,22 32,22 Z" fill="url(#royalSapphire)" stroke="url(#luxuryGold)" strokeWidth="2.5" filter="url(#royalShadow)" />
+        <path d="M32,22 C34,28 34,32 32,46" stroke="url(#luxuryGold)" strokeWidth="1.5"/>
+        <path d="M28,24 C30,30 29,36 28,44" stroke="url(#luxuryGold)" strokeWidth="1.25"/>
+        <path d="M36,24 C34,30 35,36 36,44" stroke="url(#luxuryGold)" strokeWidth="1.25"/>
     </g>
   </svg>
 );
@@ -82,6 +136,7 @@ interface Spark {
   ty: number;
   rot: number;
   size: number;
+  colorClass: string;
 }
 
 
@@ -118,6 +173,14 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     const isClick = e.type === 'click' || e.type === 'mousedown';
     const count = isClick ? 14 : 4; // click gets 14 sparks, hover gets 4 sparks
 
+    const sparkColorClasses = [
+      'from-amber-400 to-amber-200', // Gold
+      'from-yellow-300 to-amber-100', // Light Gold
+      'from-white to-amber-300', // Bright Diamond Gold
+      'from-amber-500 to-yellow-100', // Rich Amber
+      'from-sky-400 to-yellow-200', // Elegant Sapphire Spark
+    ];
+
     const newSparks = Array.from({ length: count }).map((_, i) => {
       const angle = (i * (360 / count) + Math.random() * 25) * (Math.PI / 180);
       const intensity = isClick ? 80 : 40;
@@ -133,6 +196,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
         ty,
         rot: Math.random() * 360,
         size: isClick ? (3 + Math.random() * 6) : (2 + Math.random() * 3),
+        colorClass: sparkColorClasses[Math.floor(Math.random() * sparkColorClasses.length)],
       };
     });
 
@@ -213,17 +277,18 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
           }
           .animate-gold-shimmer {
             background: linear-gradient(
-              120deg,
-              #fdba74 0%,
+              135deg,
+              #b45309 0%,
               #fbbf24 25%,
               #fffbeb 50%,
-              #fbbf24 75%,
-              #fdba74 100%
+              #f59e0b 75%,
+              #b45309 100%
             );
             background-size: 200% auto;
-            animation: gold-metallic-shimmer 3s linear infinite;
+            animation: gold-metallic-shimmer 3.5s ease-in-out infinite;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.45)) drop-shadow(0px 0px 8px rgba(245, 158, 11, 0.3));
           }
           .animate-marquee-container {
             width: 220px;
@@ -266,13 +331,16 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
             <div 
               onMouseDown={handleTriggerSparks}
               onMouseEnter={handleTriggerSparks}
-              className="flex items-center justify-center gap-3 w-full sm:w-auto relative overflow-visible cursor-pointer select-none group"
+              className="flex items-center justify-center gap-3 w-full sm:w-auto relative overflow-visible cursor-pointer select-none group px-3 py-1.5 rounded-xl border border-transparent hover:border-amber-500/10 hover:bg-amber-500/[0.02] transition-all duration-500"
             >
+              {/* Luxury ambient radial backdrop */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.06),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md pointer-events-none" />
+
               {/* Sparks render area */}
               {sparks.map((spark) => (
                 <span
                   key={spark.id}
-                  className="absolute pointer-events-none rounded-full bg-gradient-to-r from-amber-400 to-amber-300 animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                  className={`absolute pointer-events-none rounded-full bg-gradient-to-r ${spark.colorClass || 'from-amber-400 to-amber-300'} animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]`}
                   style={{
                     left: spark.x,
                     top: spark.y,
@@ -288,25 +356,25 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
                 />
               ))}
 
-              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" />
+              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-500 group-hover:scale-115 group-hover:rotate-12 filter drop-shadow-[0_0_6px_rgba(245,158,11,0.2)]" />
               
-              <div className="text-center flex flex-col items-center">
+              <div className="text-center flex flex-col items-center relative z-10">
                 <div className="flex items-center justify-center gap-1.5">
-                  <h1 className="text-lg sm:text-xl font-black tracking-[0.22em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-102">
+                  <h1 className="text-lg sm:text-xl font-black tracking-[0.24em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-105">
                     AUTONOMIA!
                   </h1>
-                  <span className="hidden sm:inline-block px-1.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 leading-none">
+                  <span className="hidden sm:inline-block px-1.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-gradient-to-r from-amber-500/10 to-yellow-500/15 text-amber-400 border border-amber-500/30 leading-none shadow-[0_0_8px_rgba(245,158,11,0.1)]">
                     PRO
                   </span>
                 </div>
-                <div className="animate-marquee-container mt-1">
-                  <span className="animate-marquee-text text-[10px] italic text-slate-400 font-sans tracking-wide leading-none">
+                <div className="animate-marquee-container mt-0.5">
+                  <span className="animate-marquee-text text-[10px] italic text-slate-400 font-sans tracking-wide leading-none group-hover:text-amber-200/80 transition-colors">
                     Autonomous Learning for Operational Excellence
                   </span>
                 </div>
               </div>
 
-              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3" />
+              <AnimatedBrainIcon size={38} className="shrink-0 transition-transform duration-500 group-hover:scale-115 group-hover:-rotate-12 filter drop-shadow-[0_0_6px_rgba(245,158,11,0.2)]" />
             </div>
 
             {/* Centered/Right-aligned Dropdown Menu Selector (Scroll Down Style) */}
@@ -403,17 +471,20 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
       {/* PC Left Navigation Sidebar (Extremely polished, executive design for desktop viewports) */}
       <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-72 bg-slate-950/70 border-r border-slate-800/60 z-30 backdrop-blur-md p-6 justify-between select-none font-sans overflow-y-auto">
         <div className="space-y-6">
-          {/* Symmetrical Logo Frame */}
+          {/* Symmetrical Logo Frame - Luxury glassmorphic golden plaque */}
           <div 
             onMouseDown={handleTriggerSparks}
             onMouseEnter={handleTriggerSparks}
-            className="flex flex-col items-center gap-3 border-b border-slate-800/50 pb-5 relative overflow-visible cursor-pointer select-none group"
+            className="flex flex-col items-center gap-2 border border-slate-800/40 bg-gradient-to-b from-amber-500/[0.02] to-slate-950/30 rounded-2xl p-5 relative overflow-hidden cursor-pointer select-none group transition-all duration-700 hover:border-amber-500/20 hover:shadow-[0_0_30px_rgba(245,158,11,0.08)]"
           >
+            {/* Elegant luxury ambient radial aura */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08),transparent_75%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-xl pointer-events-none" />
+
             {/* Sparks render area */}
             {sparks.map((spark) => (
               <span
                 key={spark.id}
-                className="absolute pointer-events-none rounded-full bg-gradient-to-r from-amber-400 to-amber-300 animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                className={`absolute pointer-events-none rounded-full bg-gradient-to-r ${spark.colorClass || 'from-amber-400 to-amber-300'} animate-spark shadow-[0_0_8px_rgba(245,158,11,0.8)]`}
                 style={{
                   left: spark.x,
                   top: spark.y,
@@ -429,19 +500,19 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
               />
             ))}
 
-            <div className="flex items-center justify-center gap-3">
-              <AnimatedBrainIcon size={34} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" />
-              <h1 className="text-xl font-black tracking-[0.22em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-105">
+            <div className="flex items-center justify-center gap-3 relative z-10">
+              <AnimatedBrainIcon size={36} className="shrink-0 transition-transform duration-500 group-hover:scale-115 group-hover:rotate-12 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.35)]" />
+              <h1 className="text-xl font-black tracking-[0.24em] font-mono leading-none animate-gold-shimmer transition-transform duration-300 group-hover:scale-105">
                 AUTONOMIA!
               </h1>
             </div>
             
-            <span className="px-2 py-0.5 text-[8.5px] tracking-widest font-black uppercase rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 leading-none flex items-center gap-1.5 transition-colors group-hover:border-amber-400/40">
+            <span className="px-2.5 py-0.5 text-[8px] tracking-widest font-black uppercase rounded bg-gradient-to-r from-amber-500/10 to-yellow-500/15 text-amber-500 border border-amber-500/20 leading-none flex items-center gap-1.5 transition-all duration-300 group-hover:border-amber-400/40 group-hover:text-amber-400 group-hover:shadow-[0_0_10px_rgba(245,158,11,0.15)] relative z-10 -mt-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               OPERATIONS ROOM PRO
             </span>
             
-            <p className="text-[10px] italic text-slate-400 text-center font-sans tracking-wide leading-relaxed max-w-[210px] transition-colors group-hover:text-slate-300">
+            <p className="text-[10px] italic text-slate-400 text-center font-sans tracking-wide leading-relaxed max-w-[210px] transition-colors group-hover:text-amber-100/70 relative z-10 -mt-0.5">
               Autonomous Learning for Operational Excellence
             </p>
           </div>
