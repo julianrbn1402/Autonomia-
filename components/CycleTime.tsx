@@ -228,7 +228,7 @@ const calculatePlanCycleTime = (distance: number): number => {
 };
 
 const PlanCycleTimeTable: React.FC = () => (
-    <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg" role="table" aria-label="Tabel Plan Cycle Time by Jarak">
+    <div className="max-h-64 overflow-y-auto border border-slate-700 rounded-lg" role="table" aria-label="Tabel Plan Cycle Time HD785 (di PC1250) by Jarak">
         <table className="w-full text-sm text-left text-slate-400">
             <thead className="text-xs text-slate-300 uppercase bg-slate-700 sticky top-0">
                 <tr>
@@ -1495,7 +1495,7 @@ const CycleTime: React.FC<CycleTimeProps> = ({ activeTab, setActiveTab }) => {
                         </h2>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-800">
-                                <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Plan Cycle Time by Jarak</h3>
+                                <h3 className="text-sm font-semibold text-slate-200 mb-3 text-center">Tabel Plan Cycle Time HD785 (di PC1250) by Jarak</h3>
                                 <PlanCycleTimeTable />
                             </div>
                             <div className="bg-slate-900/40 p-4 rounded-lg border border-slate-800">
